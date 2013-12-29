@@ -1,0 +1,66 @@
+Co to musí umět:
+
+uživatel zadá slovo, program to roz/dě/lí na sla/bi/ky
+nebo zadá text a taky to rozdělí
+
+
+Jak se to bude dělat:
+
+odsekat předpony a známá problematická slova z databáze
+připojit v~, z~, k~ ~ k dalšímu slovu (příklonky?)
+masky:
+	ch
+	vždy nedělitelné digramy a trigramy
+	ostatní digramy
+	poziční nedělitelné
+	konečně K a V, kromě rlřv a št, sk a stř, skv, str, stn, stl, štn
+	trigramy používající ^
+	odlišit slabikotvorné r a l od K
+dělení podle pravidel
+
+a nakonec nějaké vychytávky a machrovinky:
+uživatelské rozhraní -- pěkně přes konzoli
+	nápověda, args, čtení ze st. vstupu nebo ze souboru, výstup na st. výstup, samozřejmě
+	main atd.
+GUI
+Perl
+přidané funkce: počítání slabik (nepovinné)
+
+Jak řešit výjimky a divnosti:
+čísla -- pro začátek vůbec, časem třeba udělat
+závorky a divné značky, zkratky -- ?
+
+@ používám místo v, je na stejné klávese, ł taky
+udělat si masku:
+	@ v = vokál, aeiyouáéíýóůúě
+	v0 = bude diftong, au, eu, ou, ae, ai, oi, ei JINÉ NE!
+	ł k = konsonant = ostatní
+#ne:	V = slabikotvorné r a l, v jisté situaci
+	0 = přeskoč, nic, počítej s předchozím -- to je pro předem nedělitelné skupiny jako ch
+	l, r = l, r
+
+nedělitelné digramy a trigramy
+
+Pravidla:
+I. KV
+	1. otevřená slabika, KVKVKVKV...
+	2. K na konci slova (kromě Kr, Kl, KKr, KKl)
+II. skupina souhlásek
+	3. skupina K na začátku slova -- připojuje se k násl. slabice
+	4. uprostřed slova -- poslední k následujícímu V
+	5. nedělitelné souhláskové skupiny
+		a) digramy -- st, sp, th, Kř, Kv
+			Kv nemaj dodělaný!!!
+		b) digramy poziční -- podle pozice
+				-- sk, št
+		c) trigramy -- str, stř, skv, stn, stl, štn
+
+		(č) Dilema byst/rý -- by/strý. Jsem pro by/strý, budu to dělat vždy. (Časem třeba udělám možnost volby.)
+		(ď) dvě stejné samohlásky po sobě, den/ní, rl, lr, ll, rr
+III. skupiny samohlásek po sobě
+	6. au, eu, ou, ae, ai, oi, ei nedělit, pokud:
+	odělit druhý zprava i zleva
+	 a) KVVKVKV... odělit druhý zprava i zleva
+ 	 b) KVVKkv -- před nedělitelným digramem K a V
+
+
