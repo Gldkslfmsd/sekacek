@@ -6,37 +6,37 @@ def masky(slovo):
 		b=slovo[i-1:]
 		b=re.sub(x+x,x+'0',b)
 		slovo=slovo[:i-1]+b
-	slovo=re.sub('ch','c0',slovo,flags=re.IGNORECASE)
-	slovo=re.sub('s(t(?!(r|ř|n|l))|p)','s0',slovo,flags=re.IGNORECASE)
-	slovo=re.sub('th','t0',slovo,flags=re.IGNORECASE)
+	slovo=re.sub('ch','c0',slovo)
+	slovo=re.sub('s(t(?!(r|ř|n|l))|p)','s0',slovo)
+	slovo=re.sub('th','t0',slovo)
 	print(slovo)
-	slovo=re.sub('a(u|e)','a0',slovo,flags=re.IGNORECASE)
-	slovo=re.sub('e(u|i)','e0',slovo,flags=re.IGNORECASE)
-	slovo=re.sub('o(u|i)','o0',slovo,flags=re.IGNORECASE)
+	slovo=re.sub('a(u|e)','a0',slovo)
+	slovo=re.sub('e(u|i)','e0',slovo)
+	slovo=re.sub('o(u|i)','o0',slovo)
 
-	slovo=re.sub('s((t((r|l)(?!$)|ř|n))|kv)','s00',slovo,flags=re.IGNORECASE)
-	slovo=re.sub('štn','š00',slovo,flags=re.IGNORECASE)
+	slovo=re.sub('s((t((r|l)(?!$)|ř|n))|kv)','s00',slovo)
+	slovo=re.sub('štn','š00',slovo)
 
 	
 	vokály=r'(a|e|i|y|o|u|á|é|í|ý|ó|é|ů|ú|ě)'
-	slovo=re.sub(vokály,'@',slovo,flags=re.IGNORECASE)
+	slovo=re.sub(vokály,'V',slovo)
 
-	slovo=re.sub(r'(b|c|č|d|ď|f|g|h|j|k|m|n|ň|p|q|s(?!k)|š(?!t)|t|ť|w|x|z|ž)','ł',slovo,flags=re.IGNORECASE) # některé konzonanty
-	slovo=re.sub('łsk','łs0',slovo,flags=re.IGNORECASE)
-	slovo=re.sub('łšt','łš0',slovo,flags=re.IGNORECASE)
+	slovo=re.sub(r'(b|c|č|d|ď|f|g|h|j|k|m|n|ň|p|q|s(?!k)|š(?!t)|t|ť|w|x|z|ž)','K',slovo) # některé konzonanty
+	slovo=re.sub('Ksk','Ks0',slovo)
+	slovo=re.sub('Kšt','Kš0',slovo)
 
-	slovo=re.sub('ł(l|r)ł','ł@ł',slovo,flags=re.IGNORECASE)
-	slovo=re.sub('ł(l|r)$','ł@',slovo,flags=re.IGNORECASE)
-	slovo=re.sub('ł0(l|r)ł','ł0@ł',slovo,flags=re.IGNORECASE)
-	slovo=re.sub('ł0(l|r)$','ł0@',slovo,flags=re.IGNORECASE)
+	slovo=re.sub('K(l|r)K','KVK',slovo)
+	slovo=re.sub('K(l|r)$','KV',slovo)
+	slovo=re.sub('K0(l|r)K','K0VK',slovo)
+	slovo=re.sub('K0(l|r)$','K0V',slovo)
 
 
-	slovo=re.sub('ł(r|l|ř|v)@','ł0@',slovo,flags=re.IGNORECASE)
+	slovo=re.sub('K(r|l|ř|v)V','K0V',slovo)
 	
-	slovo=re.sub('ł(sk|št)','łł0',slovo,flags=re.IGNORECASE)
-	slovo=re.sub('^(sk|št)','ł0',slovo,flags=re.IGNORECASE)
+	slovo=re.sub('K(sk|št)','KK0',slovo)
+	slovo=re.sub('^(sk|št)','K0',slovo)
 
-	slovo=re.sub('(l|s|ř|v|r)','ł',slovo,flags=re.IGNORECASE) # zbytek
+	slovo=re.sub('(l|s|ř|v|r)','K',slovo) # zbytek
 
 
 
