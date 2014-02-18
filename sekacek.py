@@ -55,33 +55,38 @@ def sekej(slovo):
 			s=''
 	print(vystup,maska)
 
-#pravidla budou:
-#1 začíná se V?
-#2 KV
 def sek(slovo):
 	maska=rozliš(slovo)
 	z=''
-	if re.search(r'^VK[^VK]*K',maska):
+	#začíná se vokálem
+	if re.search(r'^VK[^VK]*K',maska): # případ Anna, apostrof
 		z=re.sub(r'(^VK)(.*$)',r'\1',maska)
 		maska=re.sub(r'(^VK)(.*$)',r'\2',maska)
-	elif re.search(r'^VK0*[^K]',maska):
-		z='V'	
-		maska=maska[1:]
-	#chci, aby to V odřízlo i s K, pokud má být za ním, a dalo to do z, to se pak přilepí na začátek
+	elif re.search(r'^V0*K0*[^K]',maska): # případ Antonín
+		z=re.sub(r'(^V0*)(.*$)',r'\1',maska)
+		maska=re.sub(r'(^V0*)(.*$)',r'\2',maska)
 	maska=re.sub(r'(K[^V]*V(K$)?)',r'\1/',maska)
+	maska=re.sub(r'/(K0*)K',r'\1/K',maska) # skupina KK uvnitř slova, z /KK dělá K/K
 	maska=((z+'/') if z else '') + maska
-	print(maska)
-#sekej('krok')
-	
-#print(masky('vichr bystřina břicho bysta přeskvělý koniklec pekl'))
+	print(slovo,maska)
+sek('krok')
+sek('vichr')
+sek('bystřina')
+sek('břicho')
+sek('bysta')
+sek('přeskvělý')
+sek('koniklec')
+sek('pekl')
 sek('postla')
 sek('skoro')
 sek('Anna')
 sek('Antonín')
 sek('lopata')
 sek('postavit')
-# jak se Dominik Macháček Máte!šč'))
-
+sek('automobil')
+sek('poloautomaticky')
+sek('pěkně')
+sek('jak')
 #asi bude lepší ou měnit za 0V, ne V0
 
 
