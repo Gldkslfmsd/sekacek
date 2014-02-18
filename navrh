@@ -30,11 +30,10 @@ Jak řešit výjimky a divnosti:
 čísla -- pro začátek vůbec, časem třeba udělat
 závorky a divné značky, zkratky -- ?
 
-@ používám místo v, je na stejné klávese, ł taky
 udělat si masku:
-	@ v = vokál, aeiyouáéíýóůúě
+	V = vokál, aeiyouáéíýóůúě
 	v0 = bude diftong, au, eu, ou, ae, ai, oi, ei JINÉ NE!
-	ł k = konsonant = ostatní
+	K = konsonant = ostatní
 #ne:	V = slabikotvorné r a l, v jisté situaci
 	0 = přeskoč, nic, počítej s předchozím -- to je pro předem nedělitelné skupiny jako ch
 	l, r = l, r
