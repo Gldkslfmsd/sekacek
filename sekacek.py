@@ -1,55 +1,5 @@
+#!/usr/bin/python3
 import re
-
-def rozliš(slovo):
-	# TODO: přepsat
-	# vypadá to hrozně, i když to funguje
-	slovo=slovo.lower()
-	for i in range(1,len(slovo)):
-		x=slovo[i-1]	
-		b=slovo[i-1:]
-		b=re.sub(x+x,x+'0',b) #jde to zrychlit, tohle je O(N^2)
-		slovo=slovo[:i-1]+b
-
-	slovo=re.sub('ch','c0',slovo)
-	slovo=re.sub('s(t(?!(r|ř|n|l))|p)','s0',slovo)
-	slovo=re.sub('th','t0',slovo)
-
-	slovo=re.sub('a(u|e)','0a',slovo)
-	slovo=re.sub('e(u|i)','0e',slovo) # modifikace, otočil jsem pořadí
-	slovo=re.sub('o(u|i)','0o',slovo)
-
-	slovo=re.sub('s((t((r|l)(?!$)|ř|n))|kv)','s00',slovo)
-	slovo=re.sub('štn','š00',slovo)
-
-	
-	vokály=r'(a|e|i|y|o|u|á|é|í|ý|ó|é|ů|ú|ě)'
-	slovo=re.sub(vokály,'V',slovo)
-
-	slovo=re.sub(r'(b|c|č|d|ď|f|g|h|j|k|m|n|ň|p|q|s(?!k)|š(?!t)|t|ť|w|x|z|ž)','K',slovo) # některé konzonanty
-	slovo=re.sub('Ksk','Ks0',slovo)
-	slovo=re.sub('Kšt','Kš0',slovo)
-
-	slovo=re.sub('K(l|r)K','KVK',slovo)
-	slovo=re.sub('K(l|r)$','KV',slovo)
-	slovo=re.sub('K0(l|r)K','K0VK',slovo)
-	slovo=re.sub('K0(l|r)$','K0V',slovo)
-
-
-	slovo=re.sub('K(r|l|ř|v)V','K0V',slovo)
-	
-	slovo=re.sub('K(sk|št)','KK0',slovo)
-	slovo=re.sub('^(sk|št)','K0',slovo)
-
-	slovo=re.sub('(l|s|ř|v|r)','K',slovo) # zbytek
-
-	return slovo
-
-def bez(co,bezčeho): # parametry jsou stringy
-	vys=''
-	for i in co:
-		if not i in bezčeho:
-			vys=vys+i
-	return vys
 
 def rozliš(slovo):
 	slovo=slovo.lower()
@@ -59,13 +9,13 @@ def rozliš(slovo):
 		(r'rr','r0'), (r'll','l0'),
 		(r'th','t0'),
 		(r'[ao]u',r'0u'), # diftongy au, eu, ou 
-		(r'^eu',r'0u'),
+		(r'^eu',r'0u'), # eu nedělitelný jen na začátku slova, Ze/us ne
 		(r'[ao]i','0V'),
 		(r'[aeiyouáéěíýóůú]','V'), # vokály	
 
 		(r'([^V])([rl])(0*[^0Vrl]|$)',r'\1V\3'), # slabikotvorné l, r
 		(r's[pt]','s0'), # nedělitelné sp a st
-		(r'([^V0lr]0*)[řlrv]',r'\g<1>0'), # Kr, Kř, Kl, TODO: Kv? podvod pak nefunguje
+		(r'([^V0lr]0*)[řlrv]',r'\g<1>0'), # Kr, Kř, Kl, Kv
 
 		(r's(tr|tř|kv)',r's00'), # str, stř, skv
 		# TODO: stn, stl, štn ignorovat?
@@ -73,39 +23,30 @@ def rozliš(slovo):
 		(r'([^V0]0*)št',r'\g<1>š0'),
 
 		(r'['+konzonanty+']','K')
-		
-		
 	]
 	for (a,b) in vyměň:
-		#print(a,b,slovo)
 		slovo=re.sub(a,b,slovo)	
-		
 	return slovo
-#maska('velryba')
-#maska('haller')
-#maska('křáp')
-#maska('chybovat chrochtat něco cm')
-#maska('vlk krk krkat vrčet vlákat')
-#maska('abstinentský')
-#maska('deštivý')
-#maska('arabština')
+
 def sekejmasku(maska):
 	vyměň=[
 		#slovo začíná vokálem
 		(r'(^0*V)(K0*V)',r'\1/\2'), # případ apostrof -- VKV... -> V/KV...
 		(r'(^0*V0*K0*)K',r'\1/K'), # případ Antonín -- VKKV... -> VK/KV...
 
+		#prostředek slova
 		(r'(K0*V(K0*$)?)',r'\1/'), # KVKV... -> KV/KV/...
 		(r'/(K0*)K',r'\1/K'), # skupina KK uvnitř slova, z /KK dělá K/K
 		(r'/(0*V)(0*K0*V)',r'/\1/\2'), # když slabika začíná V: VK/V/KV jako třeba hemi/e/dr
 		(r'/(0*V0*K0*)K',r'/\1/K'), # VKVKKV -> VK/VK/KV... např pale/on/tolog
 
-		(r'/(K0*)$',r'\1/') # podlední K se připojí k předcházející slabice
+		#konec
+		(r'/(K0*)$',r'\1/') # poslední K se připojí k předcházející slabice
 	]
 	for (a,b) in vyměň:
 		maska=re.sub(a,b,maska)
-
 	return maska
+
 def zpracujvýjimky(slovo,oddělovač='/'):
 	# TODO: načíst je na začátku programu ze souboru, / v něm bude oddělovač
 	výjimky=[
@@ -168,7 +109,7 @@ def sekejtext(text,spojovník='~',oddělovač='/'):
 			vys=vys+i
 	print(vys)
 
-def sek(slovo): # na debugování, vypíše všecky mezivýsledky sekání slova, aby se dalo debugovat
+def sek(slovo): # na debugování, vypíše všecky mezivýsledky sekání slova
 	m=rozliš(slovo)
 	print('původní slovo:\t\t',slovo)
 	print('maska:\t\t\t',m)
@@ -176,7 +117,6 @@ def sek(slovo): # na debugování, vypíše všecky mezivýsledky sekání slova
 	print('rozsekaná maska:\t',n)
 	print('rozsekané slovo:\t',sekejslovo(slovo,'/'))
 	print()
-
 
 text='''
 Z Rudoltic k domovu s kamarádem
@@ -201,7 +141,8 @@ sek('využívá')
 #sek('přeskvělý')
 #sek('koniklec')
 #sek('pekl')
-#sek('postla')
+sek('postl')
+sek('arabština')
 #sek('skoro')
 #sek('Anna')
 #sek('apostrof')
@@ -258,10 +199,6 @@ Tento program si s angličtinou správně neporadí, seká ji, jako by to byla �
 
 To je, co?
 
-Jak dlouhá slova to zvládne? Dost:
-
-tralalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalala
-
 Jak umí sekat latinu? Moc dobře ne:
 
 In principio creavit Deus caelum et terram 2 terra autem erat inanis et vacua et tenebrae super faciem abyssi et spiritus Dei ferebatur super aquas 3 dixitque Deus fiat lux et facta est lux 4 et vidit Deus lucem quod esset bona et divisit lucem ac tenebras 5 appellavitque lucem diem et tenebras noctem factumque est vespere et mane dies unus
@@ -269,3 +206,4 @@ In principio creavit Deus caelum et terram 2 terra autem erat inanis et vacua et
 6 dixit quoque Deus fiat firmamentum in medio aquarum et dividat aquas ab aquis 7 et fecit Deus firmamentum divisitque aquas quae erant sub firmamento ab his quae erant super firmamentum et factum est ita 8 vocavitque Deus firmamentum caelum et factum est vespere et mane dies secundus
 '''
 sekejtext(text)
+sekejtext(text2)
