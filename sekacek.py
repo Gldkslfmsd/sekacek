@@ -51,50 +51,90 @@ def bez(co,bezčeho): # parametry jsou stringy
 			vys=vys+i
 	return vys
 
-def maska(slovo):
-	print(slovo)
+def rozliš(slovo):
 	slovo=slovo.lower()
 	konzonanty=r'bcčdďfghjklmnňpqrřsštťvwxzž'
 	vyměň=[
 		('ch','c0'),
-		(r'[aeo]u',r'0V'), # diftongy au, eu, ou TODO? ae, ai, oi, ei
+		(r'rr','r0'), (r'll','l0'),
+		(r'th','t0'),
+		(r'[aeo](u)',r'0\1'), # diftongy au, eu, ou 
+		(r'[aoe]i','0V'),
 		(r'[aeiyouáéěíýóůú]','V'), # vokály	
-		(r'([^V])([rl])(0*[^0Vrl])',r'\1V\3'), # slabikotvorné l, r
+
+		(r'([^V])([rl])(0*[^0Vrl]|$)',r'\1V\3'), # slabikotvorné l, r
 		(r's[pt]','s0'), # nedělitelné sp a st
-		(r'th','t0'), # TODO: fakt th?
-		(r'([^V0lr]0*)[vřlr]',r'\1%'), # Kr, Kř, Kl, Kv
-			(r'%','0'), # neumim měnit skupinu \10 (skupina \1 a za tím 0)
-				
+		(r'([^V0lr]0*)[řlr]',r'\g<1>0'), # Kr, Kř, Kl, TODO: Kv? podvod pak nefunguje
+
 		(r's(tr|tř|kv)',r's00'), # str, stř, skv
 		# TODO: stn, stl, štn ignorovat?
-		# nakonec digramy poziční
+		(r'([^V0]0*)sk',r'\g<1>s0'), # poziční digramy (nedělitelné jenom v případě Ksk atp.)
+		(r'([^V0]0*)št',r'\g<1>š0'),
+
+		(r'['+konzonanty+']','K')
 		
 		
 	]
 	for (a,b) in vyměň:
-		print(a,b,slovo)
+		#print(a,b,slovo)
 		slovo=re.sub(a,b,slovo)	
 		
-	print(slovo)
-maska('velryba')
+	return slovo
+#maska('velryba')
+#maska('haller')
 #maska('křáp')
 #maska('chybovat chrochtat něco cm')
 #maska('vlk krk krkat vrčet vlákat')
+#maska('abstinentský')
+#maska('deštivý')
+#maska('arabština')
 def sekejmasku(maska):
-	z=''
-	#začíná se vokálem
-	if re.search(r'^VK[^VK]*K',maska): # případ Anna, apostrof
-		z=re.sub(r'(^VK)(.*$)',r'\1',maska)
-		maska=re.sub(r'(^VK)(.*$)',r'\2',maska)
-	elif re.search(r'^V0*K0*[^K]',maska): # případ Antonín
-		z=re.sub(r'(^V0*)(.*$)',r'\1',maska)
-		maska=re.sub(r'(^V0*)(.*$)',r'\2',maska)
-	maska=re.sub(r'(K0*V(K0*$)?)',r'\1/',maska)
-	maska=re.sub(r'/(K0*)K',r'\1/K',maska) # skupina KK uvnitř slova, z /KK dělá K/K
-	maska=((z+'/') if z else '') + maska
-	return maska
+	prvníslabika=''
+	#slovo začíná vokálem:
+	if re.search(r'^VK[^VK]*K',maska): # případ apostrof -- VKV... -> V/KV...
+		p=r'(^VK)(.*$)'
+		prvníslabika=re.sub(p,r'\1',maska)
+		zbytekslova=re.sub(p,r'\2',maska)
+	elif re.search(r'^0*V0*K0*[^K]',maska): # případ Antonín -- VKKV... -> VK/KV...
+		p=r'(^0*V0*)(.*$)'
+		prvníslabika=re.sub(p,r'\1',maska)
+		zbytekslova=re.sub(p,r'\2',maska)
+	else:
+		zbytekslova=maska
+
+	vyměň=[
+		(r'(K0*V(K0*$)?)',r'\1/'), # KVKV... -> KV/KV/...
+		(r'/(K0*)K',r'\1/K'), # skupina KK uvnitř slova, z /KK dělá K/K
+		(r'/(0*V)(0*K0*V)',r'/\1/\2')
+	]
+	for (a,b) in vyměň:
+		zbytekslova=re.sub(a,b,zbytekslova)
+
+
+	zbytekslova=((prvníslabika+'/') if prvníslabika else '') + zbytekslova
+	return zbytekslova
+
+def zpracujvýjimky(slovo,oddělovač='/'):
+	# TODO: načíst je na začátku programu ze souboru, / v něm bude oddělovač
+	výjimky=[
+		('podod','pod/od'),
+		('polo','po/lo'),
+		('troj','troj'),
+		('dvoj','dvoj'),
+		('Anna','A/nna'),
+		('odopero','od/o/pe/ro'),
+		('bezolovna','bez/o/lo/vna')
+	]
+	for (a,b) in výjimky:
+		re.sub(r'/',oddělovač,b)
+		if re.search(a,slovo):
+			return (b,slovo[len(a):])
+	return ('',slovo)
 
 def sekejslovo(slovo,oddělovač):
+	(začátek,slovo)=zpracujvýjimky(slovo,oddělovač=oddělovač)
+	if slovo=='':
+		return začátek
 	maska=rozliš(slovo)
 	maska=sekejmasku(maska)
 	if maska[-1]=='/': # oddělám poslední /
@@ -107,10 +147,9 @@ def sekejslovo(slovo,oddělovač):
 			j+=1
 		else:
 			vys=vys+oddělovač
-	return vys
-
-def sekejpředpony(slovo,oddělovač='/'):
-	předpony=['od','pod','auto','polo','troj','dvoj']
+	if začátek and vys:
+		začátek=začátek+oddělovač
+	return začátek+vys
 
 def oddělslova(text):
 	vys=[]
@@ -125,7 +164,7 @@ def oddělslova(text):
 	return vys
 		
 def sekejtext(text,spojovník='~',oddělovač='/'):
-	text=re.sub(r'([vszkVSZK]) ',r'\1'+spojovník,text)
+	text=re.sub(r'([\s^])([vszkVSZK]) ',r'\1\2'+spojovník,text)
 	a=oddělslova(text)
 	vys=''
 	for i in a:
@@ -137,8 +176,8 @@ def sekejtext(text,spojovník='~',oddělovač='/'):
 
 def sek(slovo): # na debugování, vypíše všecky mezivýsledky sekání slova, aby se dalo debugovat
 	m=rozliš(slovo)
-	print('původní slovo:\t',slovo)
-	print('maska:\t',m)
+	print('původní slovo:\t\t',slovo)
+	print('maska:\t\t\t',m)
 	n=sekejmasku(m)
 	print('rozsekaná maska:\t',n)
 	print('rozsekané slovo:\t',sekejslovo(slovo,'/'))
@@ -159,7 +198,8 @@ I řekl Bůh: „Nahromaďte se vody pod nebem na jedno místo a ukaž se souš!
 Souš nazval Bůh zemí a nahromaděné vody nazval moři. Viděl, že to je dobré.
 Bůh také řekl: „Zazelenej se země zelení: bylinami, které se rozmnožují semeny, a ovocným stromovím rozmanitého druhu, které na zemi ponese plody se semeny!“ A stalo se tak.
 '''
-#sek('krok')
+sek('stacionární')
+sek('využívá')
 #sek('vichr')
 #sek('bystřina')
 #sek('břicho')
@@ -171,24 +211,63 @@ Bůh také řekl: „Zazelenej se země zelení: bylinami, které se rozmnožuj�
 #sek('skoro')
 #sek('Anna')
 #sek('Antonín')
-#sek('klenbou')
+sek('klenbou')
 #sek('postavit')
 #sek('automobil')
 #sek('poloautomaticky') # asi budu řešit, až s předponami a známými
 #sek('automat')
 #sek('pěkně')
 #sek('jak')
-#sek('poddaný')
+sek('poddaný')
 #sek('pododdělení')
 #sek('trojúhelník')
 #sek('Boccacio')
-#sek('doktor')
-#sek('propastnou')
+sek('doktor')
+sek('propastnou')
 #sek('první')
 #sek('dveře')
-#sek('podvod')
+sek('podvod')
+#sek('denní')
+#sek('prázdná')
+#sek('prázdniny')
+#sek('prázdniny')
+#sek('bezolovnatý')
+#sek('bezouška')
+#sek('bezdomovec')
+#sek('bezinka')
+#sek('bezohlednost')
+#sek('dvojakord')
+sek('laickém')
+sek('paleontologa')
+#sek('odoperovati')
 ##asi bude lepší ou měnit za 0V, ne V0
 
-##spravit: propastnou, duch
+text2='''
+Stacionární duál odoperoval desetinásobnému geodetovi čtyřiadvacet hemiedrů doobléknuv ho asociací využívající dřevoobráběcí bibliograf.
 
-#sekejtext(text)
+Je libo hemiedr? Dodekaedr? Tetraedr? Paleontologa? Nebo fialku? 
+
+'''
+'''
+
+Mein Luftkissenfahrzeug ist voller Aale.
+Chrysanthemum leucanthemum
+familia: Compositae (Asteraceae)
+coemeterium
+
+Tento program si s angličtinou správně neporadí, seká ji, jako by to byla čeština:
+	A left-leaning red–black (LLRB) tree is a type of self-balancing binary search tree. It is a variant of the red–black tree and guarantees the same asymptotic complexity for operations, but is designed to be easier to implement.
+
+To je, co?
+
+Jak dlouhá slova to zvládne? Dost:
+
+tralalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalalala
+
+Jak umí sekat latinu? Moc dobře ne:
+
+In principio creavit Deus caelum et terram 2 terra autem erat inanis et vacua et tenebrae super faciem abyssi et spiritus Dei ferebatur super aquas 3 dixitque Deus fiat lux et facta est lux 4 et vidit Deus lucem quod esset bona et divisit lucem ac tenebras 5 appellavitque lucem diem et tenebras noctem factumque est vespere et mane dies unus
+
+6 dixit quoque Deus fiat firmamentum in medio aquarum et dividat aquas ab aquis 7 et fecit Deus firmamentum divisitque aquas quae erant sub firmamento ab his quae erant super firmamentum et factum est ita 8 vocavitque Deus firmamentum caelum et factum est vespere et mane dies secundus
+'''
+sekejtext(text2)
