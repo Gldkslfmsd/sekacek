@@ -1,4 +1,5 @@
 import re
+
 def rozliš(slovo):
 	# TODO: přepsat
 	# vypadá to hrozně, i když to funguje
@@ -13,9 +14,9 @@ def rozliš(slovo):
 	slovo=re.sub('s(t(?!(r|ř|n|l))|p)','s0',slovo)
 	slovo=re.sub('th','t0',slovo)
 
-	slovo=re.sub('a(u|e)','a0',slovo)
-	slovo=re.sub('e(u|i)','e0',slovo)
-	slovo=re.sub('o(u|i)','o0',slovo)
+	slovo=re.sub('a(u|e)','0a',slovo)
+	slovo=re.sub('e(u|i)','0e',slovo) # modifikace, otočil jsem pořadí
+	slovo=re.sub('o(u|i)','0o',slovo)
 
 	slovo=re.sub('s((t((r|l)(?!$)|ř|n))|kv)','s00',slovo)
 	slovo=re.sub('štn','š00',slovo)
@@ -43,6 +44,42 @@ def rozliš(slovo):
 
 	return slovo
 
+def bez(co,bezčeho): # parametry jsou stringy
+	vys=''
+	for i in co:
+		if not i in bezčeho:
+			vys=vys+i
+	return vys
+
+def maska(slovo):
+	print(slovo)
+	slovo=slovo.lower()
+	konzonanty=r'bcčdďfghjklmnňpqrřsštťvwxzž'
+	vyměň=[
+		('ch','c0'),
+		(r'[aeo]u',r'0V'), # diftongy au, eu, ou TODO? ae, ai, oi, ei
+		(r'[aeiyouáéěíýóůú]','V'), # vokály	
+		(r'([^V])([rl])(0*[^0Vrl])',r'\1V\3'), # slabikotvorné l, r
+		(r's[pt]','s0'), # nedělitelné sp a st
+		(r'th','t0'), # TODO: fakt th?
+		(r'([^V0lr]0*)[vřlr]',r'\1%'), # Kr, Kř, Kl, Kv
+			(r'%','0'), # neumim měnit skupinu \10 (skupina \1 a za tím 0)
+				
+		(r's(tr|tř|kv)',r's00'), # str, stř, skv
+		# TODO: stn, stl, štn ignorovat?
+		# nakonec digramy poziční
+		
+		
+	]
+	for (a,b) in vyměň:
+		print(a,b,slovo)
+		slovo=re.sub(a,b,slovo)	
+		
+	print(slovo)
+maska('velryba')
+#maska('křáp')
+#maska('chybovat chrochtat něco cm')
+#maska('vlk krk krkat vrčet vlákat')
 def sekejmasku(maska):
 	z=''
 	#začíná se vokálem
@@ -52,7 +89,7 @@ def sekejmasku(maska):
 	elif re.search(r'^V0*K0*[^K]',maska): # případ Antonín
 		z=re.sub(r'(^V0*)(.*$)',r'\1',maska)
 		maska=re.sub(r'(^V0*)(.*$)',r'\2',maska)
-	maska=re.sub(r'(K[^V]*V(K$)?)',r'\1/',maska)
+	maska=re.sub(r'(K0*V(K0*$)?)',r'\1/',maska)
 	maska=re.sub(r'/(K0*)K',r'\1/K',maska) # skupina KK uvnitř slova, z /KK dělá K/K
 	maska=((z+'/') if z else '') + maska
 	return maska
@@ -71,6 +108,10 @@ def sekejslovo(slovo,oddělovač):
 		else:
 			vys=vys+oddělovač
 	return vys
+
+def sekejpředpony(slovo,oddělovač='/'):
+	předpony=['od','pod','auto','polo','troj','dvoj']
+
 def oddělslova(text):
 	vys=[]
 	p=''
@@ -102,6 +143,8 @@ def sek(slovo): # na debugování, vypíše všecky mezivýsledky sekání slova
 	print('rozsekaná maska:\t',n)
 	print('rozsekané slovo:\t',sekejslovo(slovo,'/'))
 	print()
+
+
 text='''
 Z Rudoltic k domovu s kamarádem
 Na počátku stvořil Bůh nebe a zemi.
@@ -118,7 +161,7 @@ Bůh také řekl: „Zazelenej se země zelení: bylinami, které se rozmnožuj�
 '''
 #sek('krok')
 #sek('vichr')
-sek('bystřina')
+#sek('bystřina')
 #sek('břicho')
 #sek('bysta')
 #sek('přeskvělý')
@@ -127,8 +170,8 @@ sek('bystřina')
 #sek('postla')
 #sek('skoro')
 #sek('Anna')
-sek('Antonín')
-sek('lopata')
+#sek('Antonín')
+#sek('klenbou')
 #sek('postavit')
 #sek('automobil')
 #sek('poloautomaticky') # asi budu řešit, až s předponami a známými
@@ -138,12 +181,14 @@ sek('lopata')
 #sek('poddaný')
 #sek('pododdělení')
 #sek('trojúhelník')
-#sek('a')
-#sek('od')
-sek('propastnou')
-sek('duch')
+#sek('Boccacio')
+#sek('doktor')
+#sek('propastnou')
+#sek('první')
+#sek('dveře')
+#sek('podvod')
 ##asi bude lepší ou měnit za 0V, ne V0
 
 ##spravit: propastnou, duch
 
-sekejtext(text)
+#sekejtext(text)
