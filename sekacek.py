@@ -89,31 +89,20 @@ def rozliš(slovo):
 #maska('deštivý')
 #maska('arabština')
 def sekejmasku(maska):
-	prvníslabika=''
-	#slovo začíná vokálem:
-	if re.search(r'^VK[^VK]*K',maska): # případ apostrof -- VKV... -> V/KV...
-		p=r'(^VK)(.*$)'
-		prvníslabika=re.sub(p,r'\1',maska)
-		zbytekslova=re.sub(p,r'\2',maska)
-	elif re.search(r'^0*V0*K0*[^K]',maska): # případ Antonín -- VKKV... -> VK/KV...
-		p=r'(^0*V0*)(.*$)'
-		prvníslabika=re.sub(p,r'\1',maska)
-		zbytekslova=re.sub(p,r'\2',maska)
-	else:
-		zbytekslova=maska
-
 	vyměň=[
+		#slovo začíná vokálem
+		(r'(^V)(K0*V)',r'\1/\2'), # případ apostrof -- VKV... -> V/KV...
+		(r'(^0*V0*K0*)K',r'\1/K'), # případ Antonín -- VKKV... -> VK/KV...
+
 		(r'(K0*V(K0*$)?)',r'\1/'), # KVKV... -> KV/KV/...
 		(r'/(K0*)K',r'\1/K'), # skupina KK uvnitř slova, z /KK dělá K/K
-		(r'/(0*V)(0*K0*V)',r'/\1/\2')
+		(r'/(0*V)(0*K0*V)',r'/\1/\2'), # když slabika začíná V: VK/V/KV jako třeba hemi/e/dr
+		(r'/(0*V0*K0*)K',r'/\1/K') # VKVKKV -> VK/VK/KV... např pale/on/tolog
 	]
 	for (a,b) in vyměň:
-		zbytekslova=re.sub(a,b,zbytekslova)
+		maska=re.sub(a,b,maska)
 
-
-	zbytekslova=((prvníslabika+'/') if prvníslabika else '') + zbytekslova
-	return zbytekslova
-
+	return maska
 def zpracujvýjimky(slovo,oddělovač='/'):
 	# TODO: načíst je na začátku programu ze souboru, / v něm bude oddělovač
 	výjimky=[
@@ -210,7 +199,8 @@ sek('využívá')
 #sek('postla')
 #sek('skoro')
 #sek('Anna')
-#sek('Antonín')
+sek('apostrof')
+sek('Antonín')
 sek('klenbou')
 #sek('postavit')
 #sek('automobil')
