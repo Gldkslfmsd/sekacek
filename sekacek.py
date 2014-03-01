@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import sys
 import re
+import os.path
 
 def rozliš(slovo):
 	slovo=slovo.lower()
@@ -49,16 +50,18 @@ def sekejmasku(maska):
 		maska=re.sub(a,b,maska)
 	return maska
 
-def zpracujvýjimky(slovo,oddělovač='/'):
+def zpracujvýjimky(slovo):
 	global výjimky
+	global oddělovač
 	for (a,b) in výjimky:
 		re.sub(r'/',oddělovač,b)
 		if re.search(a,slovo):
 			return (b,slovo[len(a):])
 	return ('',slovo)
 
-def sekejslovo(slovo,oddělovač):
-	(začátek,slovo)=zpracujvýjimky(slovo,oddělovač=oddělovač)
+def sekejslovo(slovo):
+	global oddělovač
+	(začátek,slovo)=zpracujvýjimky(slovo)
 	if slovo=='':
 		return začátek
 	maska=rozliš(slovo)
@@ -89,13 +92,14 @@ def oddělslova(text):
 			p=''
 	return vys
 		
-def sekejtext(text,spojovník='~',oddělovač='/'):
+def sekejtext(text):
+	global oddělovač, spojovník
 	text=re.sub(r'([\s^])([vszkVSZK]) ',r'\1\2'+spojovník,text)
 	a=oddělslova(text)
 	vys=''
 	for i in a:
 		if re.search(r'\w',i):
-			vys=vys+sekejslovo(i,oddělovač)
+			vys=vys+sekejslovo(i)
 		else:
 			vys=vys+i
 	print(vys)
@@ -109,32 +113,124 @@ def sek(slovo): # na debugování, vypíše všecky mezivýsledky sekání slova
 	print('rozsekané slovo:\t',sekejslovo(slovo,'/'))
 	print()
 
-print(sys.argv)
+#print(sys.argv)
 
 nápověda='''
 Sekáček -- sekání českého textu na slabiky
-
 Použití: sekacek [PŘEPÍNAČ]… [SOUBOR]…
- nebo: sekace [PŘEPÍNAČ]…
+ nebo: sekacek [PŘEPÍNAČ]…
 V každém souboru na vstupu očekává český text, všechna slova v něm rozdělí na slabiky. Bude-li zadán více než jeden soubor, otevře všechny, naseká a vypíše za sebe.
 Jestliže SOUBOR nebude zadán nebo bude „-“, bude čten standardní vstup. Slovo je neprázdná posloupnost znaků oddělená jakýmikoliv znaky kromě písmen.
 Lze zvolit následující přepínače:
 	-ox, -o x, --oddělovač=x	slabiky se budou oddělovat řetězcem x, standartně /
 	-sy, -s y, --spojovník=y	neslabičná slova se ke slabice budou připojovat řetězcem y, standartně ~
-	-v SOUBOR, --výjimky=SOUBOR	otevře SOUBOR a z něj načte výjimky, slova, která má dělit jinak než standartně
+	-v SOUBOR [SOUBOR]…, --výjimky=SOUBOR	otevře SOUBOR a z něj načte slova, která má dělit jinak než standartně
 	-t, --tiše	nevypisuje žádné chybové hlášky
+	-i	ignoruje všechna varování
 	--help	vypíše tuto nápovědu a skončí
 '''
+# ukázka -- program předvede, co umí
+# přepínače nelze lepit na sebe!!!
+	# to je moc složitý
+ignorovatvarování=False
+hlásitochybách=True
+def chyba_konec():
+	global ignorovatvarování
+	if not ignorovatvarování:
+		sys.exit(1)
+def chybašpatnýpřepínač():
+	sys.stderr.write('chyba špatný přepínač\n')
+	chyba_konec()
+def chybasouborneexistuje(s):
+	if hlásitochybách:
+		sys.stderr.write('chyba, soubor „'+s+'“ nelze otevřít\n')
+	chyba_konec()
+def chybašpatnýformát(s,ř):
+	if hlásitochybách:
+		sys.stderr.write('nesprávný formát v souboru výjimek „'+s+'“ na řádku '+str(ř)+'\n')
 
+
+if '-i' in sys.argv:
+	ignorovatvarování=True
 if '--help' in sys.argv:
 	print(nápověda)
 	sys.exit()	
-přepínače=sys.argv[1][1:]
+
+
 komentáře=['#','%','//','"']
-výjimky=[]
 souboryvýjimek=['.sekacek']
-hlásitochybách=not ('-t' in sys.argv or '--tiše' in sys.argv)
-print(hlásitochybách)
+oddělovač='/'
+spojovník='~'
+souborynavstupu=[]
+def argumentjevstup(i):
+	global souborynavstupu
+	while i<len(sys.argv):
+		if os.path.isfile(sys.argv[i]):
+			souborynavstupu.append(sys.argv[i])
+		elif sys.argv[i][0]=='-':
+			chybašpatnýpřepínač()
+		else:
+			chybasouborneexistuje(sys.argv[i])
+		i+=1
+i=1
+while i<len(sys.argv):
+	a=sys.argv[i]
+	if a=='-v':
+		try: 
+			i+=1
+			while i<len(sys.argv) and os.path.isfile(sys.argv[i]):
+				if sys.argv[i] not in souboryvýjimek: 
+					souboryvýjimek.append(sys.argv[i])
+				i+=1
+			i-=1
+		except: chybašpatnýpřepínač()
+	elif re.search(r'^--výjimky=',a):
+		try: 
+			f=a[10:]
+			if os.path.isfile(f):
+				souboryvýjimek.append(f)
+			else:
+				chybasouborneexistuje(f)
+		except: chybašpatnýpřepínač()
+	elif a in ['-t','--tiše']:
+		hlásitochybách=False
+	elif a=='-o':
+		i+=1
+		if i<len(sys.argv):
+			oddělovač=sys.argv[i]
+		else:
+			chybašpatnýpřepínač()
+	elif re.search(r'^-o',a):
+		oddělovač=a[2:]
+	elif re.search(r'^--oddělovač=',a):
+		oddělovač=a[12:]
+	elif a=='-s':
+		i+=1
+		if i<len(sys.argv):
+			spojovník=sys.argv[i]
+		else:
+			chybašpatnýpřepínač()
+	elif re.search(r'^-s',a):
+		spojovník=a[2:]
+	elif re.search(r'^--spojovník=',a):
+		spojovník=a[12:]
+	elif a=='-i':
+		0
+	elif a in ['-','--']:
+		argumentjevstup(i+1)
+		break
+	else:
+		argumentjevstup(i)
+		break
+	i+=1
+
+#print('délka argv',len(sys.argv))
+#print('jsem za cyklem',souboryvýjimek)
+##print('mám hlásit o chybách?',hlásitochybách)
+#print('o',oddělovač,'s',spojovník)
+#print('navstupu bude',souborynavstupu)
+#print()
+výjimky=[]
 for s in souboryvýjimek:
 	řádek=1
 	otevřeno=False
@@ -142,7 +238,7 @@ for s in souboryvýjimek:
 		f=open(s,'r')
 		otevřeno=True
 	except:
-		if hlásitochybách: print('chyba, soubor výjimek „',s,'“ neexistuje',sep='')
+		chybasouborneexistuje(s)
 	if otevřeno:
 		for v in f:
 			for k in komentáře:
@@ -150,13 +246,30 @@ for s in souboryvýjimek:
 			if re.search(r'\w',v):
 				if re.search(r'\w*\W+\w',v):
 					v=re.split(r'[^\w/]+',v)[:-1]
-					[a,b]=v
-					výjimky.append((a,b))
+					try:
+						[a,b]=v
+						výjimky.append((a,b))
+					except:
+						chybašpatnýformát(s,řádek)
 				else:
-					if hlásitochybách: print('nesprávný formát v souboru výjimek „',s,'“ na řádku ',řádek,sep='')
+					chybašpatnýformát(s,řádek)	
 			řádek+=1
 		f.close()
-print(výjimky)
+#print('všechny výjimky: ',výjimky)
+
+vstup=''
+if souborynavstupu:
+	for s in souborynavstupu:
+		f=open(s,'r')
+		vstup=vstup+f.read()
+		f.close()
+else:
+	while True:
+		try:
+			vstup=vstup+input()+'\n'
+		except EOFError:
+			break
+sekejtext(vstup)
 text='''
 Na počátku stvořil Bůh nebe a zemi.
 Země byla pustá a prázdná a nad propastnou tůní byla tma. Ale nad vodami vznášel se duch Boží.
@@ -218,7 +331,7 @@ Bůh také řekl: „Zazelenej se země zelení: bylinami, které se rozmnožuj�
 #sek('deismus')
 #sek('Zeus')
 #sek('eutanázie')
-sek('leukémie')
+#sek('leukémie')
 #sek('neonacista')
 ##asi bude lepší ou měnit za 0V, ne V0
 
