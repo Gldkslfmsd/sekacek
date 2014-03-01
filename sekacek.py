@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+import sys
 import re
 
 def rozliš(slovo):
@@ -18,7 +19,8 @@ def rozliš(slovo):
 		(r'([^V0lr]0*)[řlrv]',r'\g<1>0'), # Kr, Kř, Kl, Kv
 
 		(r's(tr|tř|kv)',r's00'), # str, stř, skv
-		# TODO: stn, stl, štn ignorovat?
+		(r'zdn','z00'), (r'zd','z0'), # zdn a zd přidávám sám! podle příruček neni
+		# stn, stl, štn ignoruju, narozdíl od příruček
 		(r'([^V0]0*)sk',r'\g<1>s0'), # poziční digramy (nedělitelné jenom v případě Ksk atp.)
 		(r'([^V0]0*)št',r'\g<1>š0'),
 
@@ -48,18 +50,7 @@ def sekejmasku(maska):
 	return maska
 
 def zpracujvýjimky(slovo,oddělovač='/'):
-	# TODO: načíst je na začátku programu ze souboru, / v něm bude oddělovač
-	výjimky=[
-		('podod','pod/od'),
-		('polo','po/lo'),
-		('troj','troj'),
-		('dvoj','dvoj'),
-		('Anna','A/nna'),
-		('odopero','od/o/pe/ro'),
-		('bezolovna','bez/o/lo/vna'),
-		('leu','leu'),
-		('podvod','pod/vod'),
-	]
+	global výjimky
 	for (a,b) in výjimky:
 		re.sub(r'/',oddělovač,b)
 		if re.search(a,slovo):
@@ -118,8 +109,55 @@ def sek(slovo): # na debugování, vypíše všecky mezivýsledky sekání slova
 	print('rozsekané slovo:\t',sekejslovo(slovo,'/'))
 	print()
 
+print(sys.argv)
+
+nápověda='''
+Sekáček -- sekání českého textu na slabiky
+
+Použití: sekacek [PŘEPÍNAČ]… [SOUBOR]…
+ nebo: sekace [PŘEPÍNAČ]…
+V každém souboru na vstupu očekává český text, všechna slova v něm rozdělí na slabiky. Bude-li zadán více než jeden soubor, otevře všechny, naseká a vypíše za sebe.
+Jestliže SOUBOR nebude zadán nebo bude „-“, bude čten standardní vstup. Slovo je neprázdná posloupnost znaků oddělená jakýmikoliv znaky kromě písmen.
+Lze zvolit následující přepínače:
+	-ox, -o x, --oddělovač=x	slabiky se budou oddělovat řetězcem x, standartně /
+	-sy, -s y, --spojovník=y	neslabičná slova se ke slabice budou připojovat řetězcem y, standartně ~
+	-v SOUBOR, --výjimky=SOUBOR	otevře SOUBOR a z něj načte výjimky, slova, která má dělit jinak než standartně
+	-t, --tiše	nevypisuje žádné chybové hlášky
+	--help	vypíše tuto nápovědu a skončí
+'''
+
+if '--help' in sys.argv:
+	print(nápověda)
+	sys.exit()	
+přepínače=sys.argv[1][1:]
+komentáře=['#','%','//','"']
+výjimky=[]
+souboryvýjimek=['.sekacek']
+hlásitochybách=not ('-t' in sys.argv or '--tiše' in sys.argv)
+print(hlásitochybách)
+for s in souboryvýjimek:
+	řádek=1
+	otevřeno=False
+	try:
+		f=open(s,'r')
+		otevřeno=True
+	except:
+		if hlásitochybách: print('chyba, soubor výjimek „',s,'“ neexistuje',sep='')
+	if otevřeno:
+		for v in f:
+			for k in komentáře:
+				v=re.sub(k+r'.*$','',v)
+			if re.search(r'\w',v):
+				if re.search(r'\w*\W+\w',v):
+					v=re.split(r'[^\w/]+',v)[:-1]
+					[a,b]=v
+					výjimky.append((a,b))
+				else:
+					if hlásitochybách: print('nesprávný formát v souboru výjimek „',s,'“ na řádku ',řádek,sep='')
+			řádek+=1
+		f.close()
+print(výjimky)
 text='''
-Z Rudoltic k domovu s kamarádem
 Na počátku stvořil Bůh nebe a zemi.
 Země byla pustá a prázdná a nad propastnou tůní byla tma. Ale nad vodami vznášel se duch Boží.
 I řekl Bůh: „Buď světlo!“ A bylo světlo.
@@ -132,26 +170,27 @@ I řekl Bůh: „Nahromaďte se vody pod nebem na jedno místo a ukaž se souš!
 Souš nazval Bůh zemí a nahromaděné vody nazval moři. Viděl, že to je dobré.
 Bůh také řekl: „Zazelenej se země zelení: bylinami, které se rozmnožují semeny, a ovocným stromovím rozmanitého druhu, které na zemi ponese plody se semeny!“ A stalo se tak.
 '''
-sek('stacionární')
-sek('využívá')
+#sek('stacionární')
+#sek('využívá')
 #sek('vichr')
 #sek('bystřina')
+#sek('bystrý')
 #sek('břicho')
 #sek('bysta')
 #sek('přeskvělý')
 #sek('koniklec')
 #sek('pekl')
-sek('postl')
-sek('arabština')
+#sek('postl')
+#sek('arabština')
 #sek('skoro')
 #sek('Anna')
 #sek('apostrof')
 #sek('Antonín')
 #sek('klenbou')
 #sek('postavit')
-sek('automobil')
-sek('poloautomaticky')
-sek('automat')
+#sek('automobil')
+#sek('poloautomaticky')
+#sek('automat')
 #sek('pěkně')
 #sek('jak')
 #sek('poddaný')
@@ -166,7 +205,6 @@ sek('automat')
 #sek('denní')
 #sek('prázdná')
 #sek('prázdniny')
-#sek('prázdniny')
 #sek('bezolovnatý')
 #sek('bezouška')
 #sek('bezdomovec')
@@ -176,14 +214,19 @@ sek('automat')
 #sek('laickém')
 #sek('paleontologa')
 #sek('arch')
-sek('autem')
-sek('deismus')
-sek('Zeus')
-sek('eutanázie')
+#sek('autem')
+#sek('deismus')
+#sek('Zeus')
+#sek('eutanázie')
 sek('leukémie')
-sek('neonacista')
+#sek('neonacista')
 ##asi bude lepší ou měnit za 0V, ne V0
 
+popis='''
+Tento program se jmenuje sekáček.
+Dostane na vstupu český text a naseká ho na slabiky. (Trochu přesněji řečeno, mezi každé dvě uprostřed slova vloží /.)
+
+'''
 text2='''
 Stacionární duál odoperoval desetinásobnému geodetovi čtyřiadvacet hemiedrů doobléknuv ho asociací využívající dřevoobráběcí bibliograf.
 
@@ -205,5 +248,6 @@ In principio creavit Deus caelum et terram 2 terra autem erat inanis et vacua et
 
 6 dixit quoque Deus fiat firmamentum in medio aquarum et dividat aquas ab aquis 7 et fecit Deus firmamentum divisitque aquas quae erant sub firmamento ab his quae erant super firmamentum et factum est ita 8 vocavitque Deus firmamentum caelum et factum est vespere et mane dies secundus
 '''
-sekejtext(text)
-sekejtext(text2)
+#sekejtext(popis)
+#sekejtext(text)
+#sekejtext(text2)
