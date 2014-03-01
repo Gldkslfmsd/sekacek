@@ -58,13 +58,14 @@ def rozliš(slovo):
 		('ch','c0'),
 		(r'rr','r0'), (r'll','l0'),
 		(r'th','t0'),
-		(r'[aeo](u)',r'0\1'), # diftongy au, eu, ou 
-		(r'[aoe]i','0V'),
+		(r'[ao]u',r'0u'), # diftongy au, eu, ou 
+		(r'^eu',r'0u'),
+		(r'[ao]i','0V'),
 		(r'[aeiyouáéěíýóůú]','V'), # vokály	
 
 		(r'([^V])([rl])(0*[^0Vrl]|$)',r'\1V\3'), # slabikotvorné l, r
 		(r's[pt]','s0'), # nedělitelné sp a st
-		(r'([^V0lr]0*)[řlr]',r'\g<1>0'), # Kr, Kř, Kl, TODO: Kv? podvod pak nefunguje
+		(r'([^V0lr]0*)[řlrv]',r'\g<1>0'), # Kr, Kř, Kl, TODO: Kv? podvod pak nefunguje
 
 		(r's(tr|tř|kv)',r's00'), # str, stř, skv
 		# TODO: stn, stl, štn ignorovat?
@@ -91,13 +92,15 @@ def rozliš(slovo):
 def sekejmasku(maska):
 	vyměň=[
 		#slovo začíná vokálem
-		(r'(^V)(K0*V)',r'\1/\2'), # případ apostrof -- VKV... -> V/KV...
+		(r'(^0*V)(K0*V)',r'\1/\2'), # případ apostrof -- VKV... -> V/KV...
 		(r'(^0*V0*K0*)K',r'\1/K'), # případ Antonín -- VKKV... -> VK/KV...
 
 		(r'(K0*V(K0*$)?)',r'\1/'), # KVKV... -> KV/KV/...
 		(r'/(K0*)K',r'\1/K'), # skupina KK uvnitř slova, z /KK dělá K/K
 		(r'/(0*V)(0*K0*V)',r'/\1/\2'), # když slabika začíná V: VK/V/KV jako třeba hemi/e/dr
-		(r'/(0*V0*K0*)K',r'/\1/K') # VKVKKV -> VK/VK/KV... např pale/on/tolog
+		(r'/(0*V0*K0*)K',r'/\1/K'), # VKVKKV -> VK/VK/KV... např pale/on/tolog
+
+		(r'/(K0*)$',r'\1/') # podlední K se připojí k předcházející slabice
 	]
 	for (a,b) in vyměň:
 		maska=re.sub(a,b,maska)
@@ -112,7 +115,9 @@ def zpracujvýjimky(slovo,oddělovač='/'):
 		('dvoj','dvoj'),
 		('Anna','A/nna'),
 		('odopero','od/o/pe/ro'),
-		('bezolovna','bez/o/lo/vna')
+		('bezolovna','bez/o/lo/vna'),
+		('leu','leu'),
+		('podvod','pod/vod'),
 	]
 	for (a,b) in výjimky:
 		re.sub(r'/',oddělovač,b)
@@ -199,24 +204,24 @@ sek('využívá')
 #sek('postla')
 #sek('skoro')
 #sek('Anna')
-sek('apostrof')
-sek('Antonín')
-sek('klenbou')
+#sek('apostrof')
+#sek('Antonín')
+#sek('klenbou')
 #sek('postavit')
-#sek('automobil')
-#sek('poloautomaticky') # asi budu řešit, až s předponami a známými
-#sek('automat')
+sek('automobil')
+sek('poloautomaticky')
+sek('automat')
 #sek('pěkně')
 #sek('jak')
-sek('poddaný')
+#sek('poddaný')
 #sek('pododdělení')
 #sek('trojúhelník')
 #sek('Boccacio')
-sek('doktor')
-sek('propastnou')
+#sek('doktor')
+#sek('propastnou')
 #sek('první')
 #sek('dveře')
-sek('podvod')
+#sek('podvod')
 #sek('denní')
 #sek('prázdná')
 #sek('prázdniny')
@@ -227,18 +232,21 @@ sek('podvod')
 #sek('bezinka')
 #sek('bezohlednost')
 #sek('dvojakord')
-sek('laickém')
-sek('paleontologa')
-#sek('odoperovati')
+#sek('laickém')
+#sek('paleontologa')
+#sek('arch')
+sek('autem')
+sek('deismus')
+sek('Zeus')
+sek('eutanázie')
+sek('leukémie')
+sek('neonacista')
 ##asi bude lepší ou měnit za 0V, ne V0
 
 text2='''
 Stacionární duál odoperoval desetinásobnému geodetovi čtyřiadvacet hemiedrů doobléknuv ho asociací využívající dřevoobráběcí bibliograf.
 
 Je libo hemiedr? Dodekaedr? Tetraedr? Paleontologa? Nebo fialku? 
-
-'''
-'''
 
 Mein Luftkissenfahrzeug ist voller Aale.
 Chrysanthemum leucanthemum
@@ -260,4 +268,4 @@ In principio creavit Deus caelum et terram 2 terra autem erat inanis et vacua et
 
 6 dixit quoque Deus fiat firmamentum in medio aquarum et dividat aquas ab aquis 7 et fecit Deus firmamentum divisitque aquas quae erant sub firmamento ab his quae erant super firmamentum et factum est ita 8 vocavitque Deus firmamentum caelum et factum est vespere et mane dies secundus
 '''
-sekejtext(text2)
+sekejtext(text)
