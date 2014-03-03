@@ -1,16 +1,16 @@
 podod pod/od
 polo po/lo
-troj troj
-dvoj dvoj
-# poznámka, tady nic nehledej
-něco            -. ně/co % už nic
-hondza
+^troj troj/
+^dvojakord dvojakord
+# poznámka, # tady nic nehledej
+něco            ně/co % už nic
 Anna A/nna
-odopero 	od/o/pe/ro
-
+^odopero 	od/o/pe/ro % tohle je třeba spravit!!!
+# neodoperovali to seká špatně
 " co tohle?
-
-
+sedm se/dm
+osm o/sm
 bezolovna bez/o/lo/vna
 leu leu
-podvod pod/vod
+podobojí podobo/jí
+#podvod pod/vod

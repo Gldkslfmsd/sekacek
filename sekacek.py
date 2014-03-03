@@ -50,16 +50,6 @@ def sekejmasku(maska):
 		maska=re.sub(a,b,maska)
 	return maska
 
-def zpracujvýjimky(slovo):
-	return ('',slovo)
-	global výjimky
-	global oddělovač
-	for (a,b) in výjimky:
-		re.sub(r'/',oddělovač,b)
-		if re.search(a,slovo):
-			return (b,slovo[len(a):])
-	return ('',slovo)
-
 def sekejslovo(slovo):
 	global oddělovač
 	(začátek,slovo)=zpracujvýjimky(slovo)
@@ -93,6 +83,17 @@ def oddělslova(text):
 			p=''
 	return vys
 		
+def zpracujvýjimky(slovo):
+	return ('',slovo)
+	global výjimky
+	global oddělovač
+	for (a,b) in výjimky:
+		re.sub(r'/',oddělovač,b)
+		if re.search(a,slovo):
+			return (b,slovo[len(a):])
+	return ('',slovo)
+
+
 def sekejtext(text):
 	global oddělovač, spojovník, výjimky
 	for (a,b) in výjimky:
