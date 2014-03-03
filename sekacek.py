@@ -83,32 +83,48 @@ def oddělslova(text):
 			p=''
 	return vys
 		
-def zpracujvýjimky(slovo):
-	return ('',slovo)
+def zpracujvýjimky(v):
 	global výjimky
-	global oddělovač
 	for (a,b) in výjimky:
-		re.sub(r'/',oddělovač,b)
-		if re.search(a,slovo):
-			return (b,slovo[len(a):])
-	return ('',slovo)
+		v=re.sub(a,b,v)
+	return v
 
 
-def sekejtext(text):
-	global oddělovač, spojovník, výjimky
+def rozlišvýjimkyazbytek(text):
+	global výjimky
+	značka=chr(0x4885)
+	značkavýjimky=chr(0x8906)
 	for (a,b) in výjimky:
 		#print(a,b,'::',re.search(a,text),text)
-		text=re.sub(a,b,text)
-	text=re.sub(r'([\s^])([vszkVSZK]) ',r'\1\2'+spojovník,text)
-	a=oddělslova(text)
+		text=re.sub(r'('+a+')',značka+značkavýjimky+r'\1'+značka,text)
+	kousky=re.split(značka,text)
+	print(kousky)
+
+	return kousky
+
+def sekejtext(text):
+	global oddělovač, spojovník
+	značkavýjimky=chr(0x8906)
+
+	kousky=rozlišvýjimkyazbytek(text)
+
 	vys=''
-	for i in a:
-		if re.search(r'\w',i):
-		#	for (a,b) in výjimky:
-			vys=vys+sekejslovo(i)
+	for k in kousky:
+		if k and k[0]==značkavýjimky:
+			k=k[1:]
+			vys=vys+zpracujvýjimky(k)
 		else:
-			vys=vys+i
+			text=k	# jenom kvůli čitelnosti
+			text=re.sub(r'([\s^])([vszkVSZK]) ',r'\1\2'+spojovník,text)
+			a=oddělslova(text)
+			for i in a:
+				if re.search(r'\w',i):
+				#	for (a,b) in výjimky:
+					vys=vys+sekejslovo(i)
+				else:
+					vys=vys+i
 	print(vys)
+
 
 def sek(slovo): # na debugování, vypíše všecky mezivýsledky sekání slova
 	m=rozliš(slovo)
@@ -262,6 +278,9 @@ for s in souboryvýjimek:
 			řádek+=1
 		f.close()
 #print('všechny výjimky: ',výjimky)
+
+for (a,b) in výjimky:
+	b=re.sub(r'/',oddělovač,b)
 
 vstup=''
 if souborynavstupu:
