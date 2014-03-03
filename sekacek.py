@@ -52,11 +52,7 @@ def sekejmasku(maska):
 
 def sekejslovo(slovo):
 	global oddělovač
-	(začátek,slovo)=zpracujvýjimky(slovo)
-	if slovo=='':
-		return začátek
-	maska=rozliš(slovo)
-	maska=sekejmasku(maska)
+	maska=sekejmasku(rozliš(slovo))
 	if maska[-1]=='/': # oddělám poslední /
 		maska=maska[:-1]
 	vys=''
@@ -67,9 +63,7 @@ def sekejslovo(slovo):
 			j+=1
 		else:
 			vys=vys+oddělovač
-	if začátek and vys:
-		začátek=začátek+oddělovač
-	return začátek+vys
+	return vys
 
 def oddělslova(text):
 	vys=[]
@@ -81,12 +75,16 @@ def oddělslova(text):
 			vys.append(p)
 			vys.append(i)
 			p=''
+	vys.append(p)
 	return vys
 		
 def zpracujvýjimky(v):
 	global výjimky
 	for (a,b) in výjimky:
-		v=re.sub(a,b,v)
+		try:
+			v=re.sub(a,b,v)
+		except:
+			chybašpatnýregex(v)
 	return v
 
 
@@ -95,32 +93,36 @@ def rozlišvýjimkyazbytek(text):
 	značka=chr(0x4885)
 	značkavýjimky=chr(0x8906)
 	for (a,b) in výjimky:
-		#print(a,b,'::',re.search(a,text),text)
 		text=re.sub(r'('+a+')',značka+značkavýjimky+r'\1'+značka,text)
 	kousky=re.split(značka,text)
-	print(kousky)
 
 	return kousky
 
-def sekejtext(text):
-	global oddělovač, spojovník
-	značkavýjimky=chr(0x8906)
+def spojneslabičnépředložky(text):
+	global spojovník
+	return re.sub(r'([\s^])([vszkVSZK]) ',r'\1\2'+spojovník,text)
 
-	kousky=rozlišvýjimkyazbytek(text)
+def sekejtext(text):
+	značkavýjimky=chr(0x8906)
+	text=spojneslabičnépředložky(text)
+
+	samostatnáslova=oddělslova(text)
+	slovanebovýjimky=[]
+	for i in samostatnáslova:
+		slovanebovýjimky+=rozlišvýjimkyazbytek(i) # nesčítá se, pole se zřetězují
 
 	vys=''
-	for k in kousky:
+	p=False
+	for k in slovanebovýjimky:
 		if k and k[0]==značkavýjimky:
-			vys=vys+zpracujvýjimky(k[1:])
+			vys=vys+('/' if p else '')+zpracujvýjimky(k[1:])
+			p=True
+		elif re.search(r'\w',k):
+			vys=vys+('/' if p else '')+sekejslovo(k)
+			p=True
 		else:
-			k=re.sub(r'([\s^])([vszkVSZK]) ',r'\1\2'+spojovník,k)
-			samostatnáslova=oddělslova(k)
-			for s in samostatnáslova:
-				for i in s:
-					if re.search(r'\w',i):
-						vys=vys+sekejslovo(i)
-					else:
-						vys=vys+i
+			vys=vys+k
+			p=False
 	print(vys)
 
 
@@ -168,7 +170,11 @@ def chybasouborneexistuje(s):
 def chybašpatnýformát(s,ř):
 	if hlásitochybách:
 		sys.stderr.write('nesprávný formát v souboru výjimek „'+s+'“ na řádku '+str(ř)+'\n')
-
+	chyba_konec()
+def chybašpatnýregex(s):
+	if hlásitochybách:
+		sys.stderr.write('špatný regulární výraz u slova „'+s+'“\n')
+	chyba_konec()
 
 if '-i' in sys.argv:
 	ignorovatvarování=True
@@ -177,7 +183,6 @@ if '--help' in sys.argv:
 	sys.exit()	
 
 
-komentáře=['#','%','//','"']
 souboryvýjimek=['.sekacek']
 oddělovač='/'
 spojovník='~'
@@ -250,31 +255,30 @@ while i<len(sys.argv):
 #print('o',oddělovač,'s',spojovník)
 #print('navstupu bude',souborynavstupu)
 #print()
+komentáře=['#','%','//','"']
 výjimky=[]
 for s in souboryvýjimek:
 	řádek=1
-	otevřeno=False
 	try:
 		f=open(s,'r')
-		otevřeno=True
-	except:
-		chybasouborneexistuje(s)
-	if otevřeno:
 		for v in f:
 			for k in komentáře:
 				v=re.sub(k+r'.*$','',v)
-			if re.search(r'\S',v):
-				if re.search(r'\w*\W+\w',v):
+			if re.search(r'\S',v): # je to neprázdný řádek
+				if re.search(r'^\s*\S+\s+\S+\s*$',v): # jsou tam dvě slova
 					v=re.split(r'\s+',v)[:-1]
 					try:
 						[a,b]=v
 						výjimky.append((a,b))
 					except:
 						chybašpatnýformát(s,řádek)
+						# tato výjimka je zbytečná, ale co když ne?
 				else:
 					chybašpatnýformát(s,řádek)	
 			řádek+=1
 		f.close()
+	except:
+		chybasouborneexistuje(s)
 #print('všechny výjimky: ',výjimky)
 
 for (a,b) in výjimky:

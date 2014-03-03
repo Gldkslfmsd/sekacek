@@ -1,16 +1,19 @@
 podod pod/od
+   " komentáře začínají ", #, // nebo % pokračují do konce řádku
 polo po/lo
-^troj troj/
+^troj(če|hran) troj/\g<1>nic
 ^dvojakord dvojakord
-# poznámka, # tady nic nehledej
+# p # tady nic nehledej
 něco            ně/co % už nic
-Anna A/nna
+^Anna$ A/nna
 odopero 	od/o/pe/ro % tohle je třeba spravit!!!
-# neodoperovali to seká špatně
-" co tohle?
-sedm se/dm
-osm o/sm
+#" co tohle?
+^sedm se/dm
+^sedm(náct|de) se/dm/\1
+osm o/sm\1 # co to říká na osmnáct?
 bezolovna bez/o/lo/vna
-leu leu
+leu           leu
 podobojí podobo/jí
-#podvod pod/vod
+podvod pod/vod
+
+# nechám omezení na jednoslovné výjimky, pro jednoduchost
