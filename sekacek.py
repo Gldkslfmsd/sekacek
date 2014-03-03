@@ -20,7 +20,7 @@ def rozliš(slovo):
 		(r'([^V0lr]0*)[řlrv]',r'\g<1>0'), # Kr, Kř, Kl, Kv
 
 		(r's(tr|tř|kv)',r's00'), # str, stř, skv
-		(r'zdn','z00'), (r'zd','z0'), # zdn a zd přidávám sám! podle příruček neni
+		(r'zdn','z00'), (r'zd','z0'), # zdn a zd přidávám sám! podle příruček to není nedělitelné
 		# stn, stl, štn ignoruju, narozdíl od příruček
 		(r'([^V0]0*)sk',r'\g<1>s0'), # poziční digramy (nedělitelné jenom v případě Ksk atp.)
 		(r'([^V0]0*)št',r'\g<1>š0'),
@@ -51,6 +51,7 @@ def sekejmasku(maska):
 	return maska
 
 def zpracujvýjimky(slovo):
+	return ('',slovo)
 	global výjimky
 	global oddělovač
 	for (a,b) in výjimky:
@@ -93,12 +94,16 @@ def oddělslova(text):
 	return vys
 		
 def sekejtext(text):
-	global oddělovač, spojovník
+	global oddělovač, spojovník, výjimky
+	for (a,b) in výjimky:
+		#print(a,b,'::',re.search(a,text),text)
+		text=re.sub(a,b,text)
 	text=re.sub(r'([\s^])([vszkVSZK]) ',r'\1\2'+spojovník,text)
 	a=oddělslova(text)
 	vys=''
 	for i in a:
 		if re.search(r'\w',i):
+		#	for (a,b) in výjimky:
 			vys=vys+sekejslovo(i)
 		else:
 			vys=vys+i
@@ -243,9 +248,9 @@ for s in souboryvýjimek:
 		for v in f:
 			for k in komentáře:
 				v=re.sub(k+r'.*$','',v)
-			if re.search(r'\w',v):
+			if re.search(r'\S',v):
 				if re.search(r'\w*\W+\w',v):
-					v=re.split(r'[^\w/]+',v)[:-1]
+					v=re.split(r'\s+',v)[:-1]
 					try:
 						[a,b]=v
 						výjimky.append((a,b))
