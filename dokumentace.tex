@@ -1,28 +1,85 @@
-\language\czech
+\language\czech 
 
-{\bf Dokumentace}
+%{\bf Dokumentace}
 
-* uÅ¾ivatelskÃ¡:
-struÄnÃ½ popis -- sekÃ¡ slova, jak, vÃ½jimky
-ÃºÄel, k Äemu se to mÅ¯Å¾e hodit
+%* u¾ivatelská:
+%struènı popis -- seká slova, jak, vıjimky
+%úèel, k èemu se to mù¾e hodit
+%
+%ovládání
+%-- v¹ecky pøepínaèe s ukázkami
+%-- formát souboru vıjimek
+%
+%licence, autor, verze, datum vzniku
+%
+%?informace o verzi
+%
+%* programátorská:
+%obsah balíèku
+%pravidla pro strojové sekání
+%-- pravidla
+%-- nedìlitelné skupiny
+%jak se to dìlá
+%-- popis v¹ech funkcí
+%slo¾itost
+%Python3, pou¾ité prostøedky
+%-- poznámka k diakritice
+%mo¾ná vylep¹ení do dal¹ích verzí
+%-- exe pro Windows
+%-- GUI
+%-- Perl? asi ne
+% -- nastavení pøístupu k dìlení -- by/strı nebo bys/trı
+%-- poèítání slabik
+%-- náhodné básnièky a písnièky
+%informace o autorovi, o dokumentaci
 
-ovlÃ¡dÃ¡nÃ­
--- vÅ¡ecky pÅ™epÃ­naÄe s ukÃ¡zkami
--- formÃ¡t souboru vÃ½jimek
+\def\n#1#2{%
+\ifnum #1=3%
+	{\bigskip\bf #2\bigskip} 
+\else%
+	\bigskip\centerline{\bf #2}\bigskip%
+\fi}
 
-?informace o verzi
+\n1{Sekáèek -- informace pro u¾ivatele}
 
-* programÃ¡torskÃ¡:
-pravidla pro strojovÃ© sekÃ¡nÃ­
--- pravidla
--- nedÄ›litelnÃ© skupiny
-jak se to dÄ›lÃ¡
--- popis vÅ¡ech funkcÃ­
-Python3, pouÅ¾itÃ© prostÅ™edky
--- poznÃ¡mka k diakritice
-moÅ¾nÃ¡ vylepÅ¡enÃ­ do dalÅ¡Ã­ch verzÃ­
--- GUI
--- Perl? asi ne
--- poÄÃ­tÃ¡nÃ­ slabik
--- nÃ¡hodnÃ© bÃ¡sniÄky a pÃ­sniÄky
+Program Sekáèek slou¾í k~dìlení slov èeského textu na slabiky. Slova dìlí tak,
+jak slabikuje èlovìk, ne tak, jak se dìlí slova, která se pøi psaní celá nevejdou na jeden
+øádek. Rozdíl v~tom je malı, ale je. Napøíklad není pøípustné dìlit na dva øádky
+mo/drı, ale vyslabikovat mo/drı lze.
+
+% vyu¾ití
+Rozdìlit text strojovì na slabiky se mù¾e hodit napøíklad pøi vırobì
+zpìvníku, kde je tøeba pøiøadit ke ka¾dé notì jednu slabiku. Sekáèek se dá
+vyu¾ít také pøi skládání básnièek, kdy¾ chceme, aby byl ve ver¹i urèitı poèet
+slabik. Aby se daly spoèítat, musí se nejdøív vìdìt, kde která slabika je.
+A to vám øekne Sekáèek.
+
+Sekáèek pøedpokládá, ¾e mu u¾ivatel zadá èeskı text. S~cizojazyènım si neporadí správnì,
+nemù¾ete èekat, ¾e ho rozdìlí podle toho, jak se slabikuje napøíklad
+v~angliètinì nebo nìmèinì. Slovo language rozdìlí na lan/gu/a/ge, jako
+kdybyste ho vyslovili èesky. (Zato ale lengvid¾ rozdìlí na len/gvid¾. :)
+
+Pokud chcete Sekáèku øíct, ¾e Beethoven se dìlí jako Bee/tho/ven a ne
+Be/e/tho/ven, jak by si jinak myslel, máte tu mo¾nost. Sekáèek toti¾ hledí
+na kombinace písmen a ty rozdìlí podle nìjakıch pravidel, která zná. Ta
+pravidla ale nefungují na v¹echno. Existují slova jako bezolovnatı nebo
+podobojí, která se podle nich rozdìlí na be/zo/lov/na/tı a po/do/bo/jí.
+Je tøeba znát nìjaké vıjimky. Nìkteré u¾ zná, mù¾ete mu je zmìnit nebo
+nìjaké pøidat sami.
+Více se doètete dále v~tomto textu.
+
+\n2{Po¾adavky pro spu¹tìní}
+
+Sekáèek je napsán v~Pythonu 3. 
+
+\n2{Ovládání}
+
+Sekáèek komunikuje s~u¾ivatelem pouze pøes pøíkazovou øádku.
+
+\n3{Spu¹tìní}
+
+Spou¹tí se pøíkazem {\tt sekacek.py}. Po zadání tohoto pøíkazu se zøejmì nic
+nestane, Sekáèek èeká na vstup na 
+
+
 \bye
