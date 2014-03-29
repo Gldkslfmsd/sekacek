@@ -1,5 +1,3 @@
-\language\czech 
-
 %{\bf Dokumentace}
 
 %* u¾ivatelská:
@@ -33,15 +31,17 @@
 %-- náhodné básnièky a písnièky
 %informace o autorovi, o dokumentaci
 
-\def\n#1#2{%
-\ifnum #1=3%
-	{\bigskip\bf #2\bigskip} 
-\else%
-	\bigskip\centerline{\bf #2}\bigskip%
-\fi}
+\input mac-dokumentace.tex
 
-\n1{Sekáèek -- informace pro u¾ivatele}
+~
+\vskip1 cm
+\centerline{\nadA Sekáèek}
+\vskip 0.5cm
+\centerline{\nadB Informace pro u¾ivatele}
+\vskip 1cm
 
+
+\n2{Co je Sekáèek?}
 Program Sekáèek slou¾í k~dìlení slov èeského textu na slabiky. Slova dìlí tak,
 jak slabikuje èlovìk, ne tak, jak se dìlí slova, která se pøi psaní celá nevejdou na jeden
 øádek. Rozdíl v~tom je malý, ale je. Napøíklad není pøípustné dìlit na dva øádky
@@ -70,16 +70,104 @@ Více se doètete dále v~tomto textu.
 
 \n2{Po¾adavky pro spu¹tìní}
 
-Sekáèek je napsán v~Pythonu 3. 
+Autor zaruèuje správné fungování pouze na poèítaèi s~unixovým operaèním
+systémem, na kterém je nainstalován interpretr Pythonu 3. Ten je standartnì
+na vìt¹inì distribucí. Minimální systémové po¾adavky pro poèítaè se tedy odvíjí od
+po¾adavkù Pythonu 3.
 
 \n2{Ovládání}
 
-Sekáèek komunikuje s~u¾ivatelem pouze pøes pøíkazovou øádku.
+Sekáèek komunikuje s~u¾ivatelem pouze pøes pøíkazový øádek.
 
-\n3{Spu¹tìní}
+\n3{Spu¹tìní, vstup a výstup}
 
-Spou¹tí se pøíkazem {\tt sekacek.py}. Po zadání tohoto pøíkazu se zøejmì nic
-nestane, Sekáèek èeká na vstup na 
+Spou¹tí se pøíkazem {\tt sekacek.py}. Je-li zadán bez parametrù, èeká na
+text k~nasekání na standartním vstupu. Výstup vypí¹e opìt na standartní
+výstup.
 
+Za názvem programu lze zadat pøepínaèe a nakonec název souboru nebo souborù,
+které Sekáèek otevøe a naseká jejich obsah. Potom je vypí¹e na standartní
+výstup, nemìní je na místì.
+
+\n3{Pøepínaèe}
+\newcount\prvniprepinac
+\prvniprepinac=1
+\def\prep#1{%
+\ifodd \prvniprepinac \prvniprepinac=0%
+\else \bigskip%
+\fi%
+{{{\tt #1}}}\par}%
+
+\prep{--help}
+Vypí¹e nápovìdu a skonèí.
+
+\break
+
+\prep{-o-, -o -, --oddìlovaè=-}
+Oddìlovaè slabik. Mezi slabiky uprostøed slov vkládá sekáèek \uv{{\tt /}}, není-li
+zadáno jinak. Pøepínaèem {\tt -o-} mù¾ete jeho chování zmìnit,
+ pak bude mezi ka¾dou slabiku vkládat øetìzec \uv{{\tt -}}. Doèkáte
+se tím napøíklad výstupu {\tt a-hoj}.
+
+Místo {\tt -} mù¾ete napsat libovolný znak nebo i více znakù.
+
+\prep{-s+, -s +, --spojovník=+}
+Spojovaè slov, která tvoøí jednu slabiku, napøíklad {\tt k+le/su}.
+Implicitnì vkládá \uv{\tt\char`\~}, vlnku.
+
+Podobnì jako u~oddìlovaèe lze zadat i více znakù.
+
+\prep{-v SOUBOR [SOUBOR]\dots, --výjimky=SOUBOR}
+Soubor výjimek. Otevøe soubor se zadaným názvem, z~nìj naète slova, která má
+dìlit jinak ne¾ pravidelnì. Pøi volbì pøepínaèe {\tt -v} lze zadat i více
+sobuorù. V~souboru Sekáèek oèekává pøesný formát popsaný
+ní¾e. Pokud soubor neexistuje, skonèí chybou. Pokud v~nìm není po¾adovaný obsah, 
+vypí¹e to na standartní chybový výstup.
+
+Sekáèek v¾dy otvírá soubor výjimek {\tt .sekacek}, který se má nacházet v~aktuálním
+adresáøi. 
+
+\prep{-t, --ti¹e}
+Tichý mód. Sekáèek nevypisuje ¾ádné chybové hlá¹ky na standartní chybový
+výstup. U~záva¾ných chyb ale skonèí.
+
+\prep{-i}
+Ignoruje v¹echna varování, která jinak zpùsobují konec programu, a bì¾í dál.
+Chybové hlá¹ky ale vypisuje (není-li zadáno {\tt -t}).
+
+
+\n2{Soubory výjimek}
+
+Na ka¾dém øádku souboru výjimek Sekáèek oèekává dva regulární výrazy
+oddìlené neprázdnou posloupností mezer èi tabulátorù. Regulární výrazy nesmí obsahovat
+mezery.
+
+Kotvy {\tt \^{}} a {\tt \$} znamenají zaèátek a konec slova, slovo je
+ohranièeno znaky jinými ne¾ písmena.
+
+První výraz znamená, co se má dìlit jinak, druhý výraz znamená, jak se to má
+dìlit. Mezi hranice slabik uprostøed slov ve druhém výrazu vlo¾te \uv{{\tt
+/}}. Pøed i za výraz Sekáèek vkládá konec slabiky. 
+
+Do souborù je mo¾no vkládat komentáøe. Ty zaèínají znakem {\tt \%}, {\tt
+\#}, {\tt "} nebo dvìma lomítky {\tt //} a pokraèují a¾ do konce øádku.
+
+Prázdné øádky se ignorují.
+
+Pøíklad:
+{\tt
+odopero od/o/pe/ro
+}
+Rozdìlí {\tt sedm(de|náct) se/dm/{\tt\char`\\}1} rozdìlí jk
+TODO: dodìlat
+
+\n2{O autorovi}
+
+Sekáèek vznikl jako zápoètový program pøedmìtu Programování I na
+Matematicko-fy\-zi\-kál\-ní fakultì UK v~Praze v~zimním semestru 2013/14. 
+
+Autorem je Dominik Macháèek. Kontakt na autora: gldkslfmsd@gmail.com.
+
+Sekáèek je pøístupný pod licencí Creative Commons.
 
 \bye

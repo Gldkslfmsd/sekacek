@@ -10,7 +10,7 @@ def rozliš(slovo):
 		('ch','c0'),
 		(r'rr','r0'), (r'll','l0'),
 		(r'th','t0'),
-		(r'[ao]u',r'0u'), # diftongy au, eu, ou 
+		(r'[ao]u',r'0u'), # diftongy au, ou 
 		(r'^eu',r'0u'), # eu nedělitelný jen na začátku slova, Ze/us ne
 		(r'[ao]i','0V'),
 		(r'[aeiyouáéěíýóůú]','V'), # vokály	
@@ -27,8 +27,8 @@ def rozliš(slovo):
 
 		(r'['+konzonanty+']','K')
 	]
-	for (a,b) in vyměň:
-		slovo=re.sub(a,b,slovo)	
+	for (a,b) in vyměň: # to tu nemá bej, ne?
+		slovo=re.sub(a,b,slovo)	# TODO: jak to je?
 	return slovo
 
 def sekejmasku(maska):
@@ -292,10 +292,11 @@ if souborynavstupu:
 		f.close()
 else:
 	while True:
-		try:
-			vstup=vstup+input()+'\n'
-		except EOFError:
+		try: i=input()
+		except (KeyboardInterrupt,EOFError): 
+			vstup+=i
 			break
+		else: vstup+=i+'\n'
 sekejtext(vstup)
 text='''
 Na počátku stvořil Bůh nebe a zemi.
