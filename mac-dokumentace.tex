@@ -1,0 +1,25 @@
+\language\czech 
+\advance\hsize by -1.5cm
+\hoffset=5.25mm
+%\parindent=0pt
+\font\nadA=csb10 at 25px
+\font\nadB=csr10 at 20px
+\font\nadC=csbx10 at 12px
+\def\n#1#2{%
+\ifnum #1=1%
+	\bigskip\centerline{\nadA #2}\bigskip 
+\else%
+\ifnum #1=2
+	\bigskip\centerline{\nadC #2}\bigskip%
+\else
+	{\bigskip\bf #2\bigskip}
+\fi%
+\fi}
+\def\fce#1 {{\it #1 }}
+\def\zpetnelomitko{\char`\\}
+\def\vlnka{\char`\~}
+\def\O{{\cal O}}
+\def\od{\item{--}}
+\def\link#1 {{\tt #1}\ }%
+\newcount\cislopoznamky \cislopoznamky=0
+\def\pozn{\advance \cislopoznamky by 1\footnote{{$ ^\the\cislopoznamky$}}}%

@@ -1,0 +1,330 @@
+%{\bf Dokumentace}
+
+%* u¾ivatelská:
+%struèný popis -- seká slova, jak, výjimky
+%úèel, k èemu se to mù¾e hodit
+%
+%ovládání
+%-- v¹ecky pøepínaèe s ukázkami
+%-- formát souboru výjimek
+%
+%licence, autor, verze, datum vzniku
+%
+%?informace o verzi
+%
+%* programátorská:
+%obsah balíèku
+%pravidla pro strojové sekání
+%-- pravidla
+%-- nedìlitelné skupiny %jak se to dìlá
+%-- popis v¹ech funkcí
+%slo¾itost
+%Python3, pou¾ité prostøedky
+%-- poznámka k diakritice
+%mo¾ná vylep¹ení do dal¹ích verzí
+%-- exe pro Windows
+%-- GUI
+%-- Perl? asi ne
+% -- nastavení pøístupu k dìlení -- by/strý nebo bys/trý
+%-- poèítání slabik
+%-- náhodné básnièky a písnièky
+%informace o autorovi, o dokumentaci
+%\parindent=0.5cm
+
+%tady jsem vzal nápad: http://is.muni.cz/th/72595/fi_m/LanguaGuess.txt
+%
+%pøeházet kapitoly, odstavce?
+\input mac-dokumentace.tex
+
+~
+\vskip1 cm
+\centerline{\nadA Sekáèek}
+\vskip 0.5cm
+\centerline{\nadB Programátorská dokumentace}
+\vskip 1cm
+
+\n2{Co je Sekáèek?}
+
+Sekáèek je program na dìlení èeského textu na slabiky.
+Slova dìlí podle jejich struktury a
+podle vzájemných písmen, z~kterých se skládá. Sekáèek zná nìjaká pravidla, podle kterých
+to lze provádìt. Problematická slova, na která
+pravidla neplatí, porovnává s~jejich databází a dìlí jinak.
+Ta databáze bude zøejmì v¾dy neúplná, je na u¾ivateli, aby si ji doplnil.
+
+
+\n3{Co patøí k~Sekáèku?}
+
+K Sekáèku patøí tyto soubory:
+
+\od sekacek.py -- zdrojový kód
+
+\od .sekacek -- pùvodní soubor výjimek, který Sekáèek otvírá otvírá pøi
+ka¾dém spu¹tìní
+
+\od dokumentace.pdf -- u¾ivatelská dokumentace
+
+\od dokumentace-programatorska.pdf -- tato programátorská dokumentace
+
+\od vzorové vstupy
+
+
+\n3{V èem je napsán?}
+
+Sekáèek je napsán v~Pythonu 3.%
+	\pozn{\link https://www.python.org/ }
+Tento skriptovací jazyk jsem vybral
+z~nìkolika dùvodù. Jednak proto, ¾e
+ho ovládám na dostateèné úrovni, proto, ¾e má mnoho funkcí
+a knihoven jako napøíklad regulární výrazy, které mohu pou¾ít a nemusím je
+psát sám, dále je velmi struèný, jednoduchý a intuitivní, o~spoustu vìcí se
+programátor nemusí starat.
+V~Pythonu lze napsat napøíklad výraz \uv{{\tt 0 <= x <=
+10}}, to v~jiných jazycích takto snadno nelze.
+
+Nevýhodou Pythonu je, ¾e potøebuje
+interpretr a není proto tak rychlý jako kompilované programovací jazyky.
+Úèelem Sekáèku ale není dìlit slova na slabiky
+nejrychleji, jak se to dá s~pou¾itím poèítaèe zvládnout. Cílem je napsat
+program tak, aby fungoval a byl pou¾itelný pro rozumnì velké vstupy. To Sekáèek
+je.
+
+Celý zdrojový kód Sekáèku je soubor sekacek.py.
+Má dvì hlavní èásti. Prvních zhruba 140 øádkù jsou funkce, které zají¹»ují
+hlavní práci programu, samotné sekání na slabiky. Zbytek programu, zhruba
+150 øádkù, se stará o~naètení vstupu, kontrolu jeho správnosti
+a o~komunikaci s~u¾ivatelem.
+
+\n3{Poznámka k~diakritice}
+
+Programátora, který si otevøe sekacek.py, na první pohled zarazí funkce
+s~názvem \fce rozli¹. Není zvykem pojmenovávat funkce a promìnné
+s~diakritikou, pøesto¾e Python 3 to umo¾òuje. Sekáèek je ale program na
+sekání èeského textu, proto jsem zvolil názvy v~èeském jazyce.
+Nepøedpokládám, ¾e by si jeho zdrojový kód prohlí¾el a chtìl pochopit nìkdo,
+kdo neumí èesky a neumí si správnì zobrazit soubor v~UTF-8. Podobná klíèová slova
+jako \fce sténá a \fce stìna, která by se li¹ila pouze v~diakritice a ten rozdíl by
+by tedy byl snadno pøehlédnutelný, nepou¾ívám, tak¾e doufám, ¾e tato volba nikomu neublí¾í.
+
+\n2{Jak pracuje Sekáèek?}
+
+Sekáèek vyu¾ívá postup pro strojové dìlení slov na slabiky, který
+vychází z~èlánku Dìlení slov v~èe¹tinì pomocí strojù
+z~èasopisu Na¹e øeè\pozn{Dostupný na internetu
+zde: \link http://nase-rec.ujc.cas.cz/archiv.php?art=5348
+}.
+
+
+\n3{Strojové dìlení slov na slabiky}
+
+
+Slova v~textu se skládají z~grafémù (jinak øeèeno písmen), dají se rozdìlit
+podle významu v~konkrétním slovì na vokály a konzonanty.
+
+Vokály jsou samohlásky, a, e, i, o, u, y, a jejich dlouhé verze. Budu je
+znaèit znakem V.
+
+Konzonanty, K, jsou souhlásky, b, f, l, m, p, s, v, z, h, ch, k, r, d, t, n
+atd.
+
+V~èlánku jsou je¹tì dal¹í skupiny grafémù, slabièné konzonanty, co¾ jsou
+slabikotvorná l a r, souhláskové grafémy, co¾ jsou souhlásky kromì
+slabikotvorných l a r a dvojhlásky ou, eu, a je¹tì dal¹í skupiny. Ty ale
+umím pøevést na tyto dvì, tak¾e je prozatím nebudu uva¾ovat.
+
+%Ka¾dá je tvoøena jádrem, to je obvykle vokál, mù¾e mí souhlásky pøed jádrem
+%a po jádru.
+
+\bigskip 
+
+{\bf Pravidla:}
+
+\def\pr#1{\item{#1}}%
+
+\n3{I. skupiny KV}
+
+\pr{a)}
+Pokud se vyskytuje pøed V jeden souhláskový grafém K, pøipojuje
+se k~následujícímu vokálu a tvoøí tak jednu slabiku, to je upøednostòuje se
+otevøená slabika. Napøíklad kolo, KV/KV.
+
+\n3{II. skupiny souhlásek}
+
+\pr{a)}
+Skupina K na zaèátku slova se pøipojuje celá k~následující slabice.
+
+\pr{b)}
+Pokud na konci slova následuje za posledním vokálem více souhlásek,
+pøipojují se v¹echny k~pøedchozí samohlásce, napø. ve/li/kost.
+
+\pr{c)}
+Stojí-li skupina K uprostøed slova, pøipojuje se k~následující samohlásce
+poslední souhláska skupiny.
+
+\n3{III. nedìlitelné skupiny}
+
+Nìkteré skupiny souhlásek jsou nedìlitelné, v¾dy jsou souèástí jedné slabiky. Ty se
+pro Sekáèek vyjádøí, jako by byly jen jedna slabika, pak se aplikují ostatní
+pravidla.
+\bigskip
+
+Tyto skupiny jsou 
+
+\pr{a)}
+Souhláskové digramy: sp, st, th, Kr, Kl, Kø (za K je zde jakýkoliv konzonant
+kromì l, r, ø), Kv.
+
+\pr{b)}
+Souhláskové trigramy: str, stø, skv
+
+\pr{c)}
+Nedìlitelné digramy pozièní, ty jsou nedìlitelné pouze v~pøípadì, ¾e se pøed
+nimi nachází souhláska: sk a ¹t, napøíklad náchod(sk)ý, arab(¹t)ina.
+
+\n3{IV. skupiny samohlásek}
+\pr{a)} Skupiny au, ou, ai, oi a eu na záèátku slova pova¾uji za
+nedìlitelné.
+
+\pr{b)} Ostatní výskyty dvou samohlásek vedle sebe se v¾dy oddìlují.
+
+
+\n3{Výjimky}
+
+Existují slova, která se podle tìchto pravidel nebudou dìlit správnì,
+napøíklad pododdìlení se podle pravidla I má dìlit po/dod/dì/le/ní. Tato
+slova tvoøí výjimky a je tøeba je o¹etøit zvlá¹».
+
+\n2{Sem se dá nìjaký vtipný nadpis}
+
+%Text má Sekáèek ulo¾ený v~øetìzcích, v~typu string. V~Sekáèku se hodnì
+%pracuje s~regulárními výrazy, které pou¾ívají funkce z~modulu re. 
+
+Jak Sekáèek rozdìlí slovo na slabiky? 
+%Pøeskoèím na èas v¹echno naèítání vstupu a o¹etøování výjimek a popí¹u,
+%jak se to dìlá. Sekáèek aplikuje pravidla popsaná vý¹e. 
+
+
+%Mám slovo. Jak ho rozdìlím?
+
+Stará se o~to funkce \fce sekejslovo. Udìlá si ze slova masku, k~tomu je funkce
+\fce rozli¹. Maska je øetìzec
+stejné délky jako slovo, v~kterém jsou ale znaky K na tìch místech, kde jsou ve slovì
+souhlásky, V jsou na místech samohlásek. Na místì znakù, které se mají
+pøipojovat k~jiným (nedìlitelné skupiny, \uv{h} v~písmenu \uv{ch}) je znak 0. 
+Napøíklad slovo chobot má masku
+K0VKVK. 
+
+Slabikotvorná r a l mají znaèku V, pøistupuje se k~nim jako
+k~samohláskám. Funkce \fce rozli¹ je umí rozeznat od
+obyèejných, neslabikotvorných.
+
+%K~samotnému nahrazování znakù se velmi hodí regulární výrazy, bez nich by
+%stejná práce byla mnohem slo¾itìj¹í.
+
+Kdy¾ je maska vytvoøená, naseká se podle pravidel popsaných vý¹e, pøesnìji
+øeèeno na hranici slabik do masky vlo¾í \uv{/}. Dìlá to funkce
+\fce sekejmasku. Znaky 0 v~masce pøitom pøeskakuje.
+
+Poté se spárují znaky z~nasekané masky se znaky z~pùvodního slova
+a na správné pozice se vlo¾í oddìlovaè slabik. Toto slovo se pak vypí¹e.
+
+\bigskip
+
+Málokdy ale Sekáèek dostane na vstupu samostatné slovo, ve specifikaci je,
+¾e na vstupu mù¾e být èeský text. Ten mù¾e být slo¾ený z~více slov oddìlených mezerami,
+konci øádku, teèkami, èárkami, uvozovkami a podobnì. Funkce \fce sekejtext tedy text
+rozdìlí na slova, na to si zavolá funkci \fce oddìlslova. Od ní dostane
+seznam, ve kterém je ka¾dý prvek øetìzec. Ty prvky, které obsahují
+písmena (pøesnìji øeèeno vyhovují regulérnímu výrazu {\tt \zpetnelomitko
+w}), naseká, proto¾e to jsou slova, ostatní jenom vypí¹e v~pùvodním poøadí
+mezi nì.
+
+\bigskip
+
+Je¹tì zbývá popsat, jak Sekáèek o¹etøuje výjimky. Poté, co \fce sekejslova
+získá seznam se samostatnými slovy, zavolá na ka¾dé slovo \fce
+rozli¹výjimkyazbytek. 
+
+Tato funkce porovná slovo s~ka¾dým ze seznamu
+výjimek. Nalezenou shodu ohranièí z~obou stran pomocným znakem 0x4885 a za
+tento znak dá je¹tì jeden 0x8906. Podle toho prvního znaku rozdìlí
+slovo na samostatná slova. Ten druhý znak je znaèka, ¾e toto slovo je
+výjimka. Funkce \fce sekejtext na nìj pak nebude volat \fce sekejslovo, ale
+\fce zpracujvýjimky. 
+
+Ty dva znaky jsou náhodné èínské znaky, o~kterých pøedpokládám, ¾e se na
+vstupu nikdy nevyskytnou. Pokud je nìjaký u¾ivatel zadá, Sekáèek nemusí
+fungovat správnì. Pøedpokládám ale, ¾e pokud se na vstupu vyskytnou, nebude
+se jednat o èeský text, ale cizojazyèný, a ten Sekáèek správnì neseká tak
+jako tak. 
+
+Univerzálnì správným øe¹ením by bylo projít vstup a najít nìjaké
+dva znaky z~celého Unicodu, které se na vstupu nevyskytují, a ty pou¾ít.
+Tento postup jsem ale nepou¾il, proto¾e pak by byl Sekáèek pøíli¹
+komplikovaný.
+
+Stejnì tak to, ¾e \fce rozli¹výjimkyazbytek porovnává ka¾dé slovo ze seznamu
+výjimek s~ka¾dým, není optimální. To má pøíli¹ velkou asymptotickou
+slo¾itost, lep¹í by bylo pou¾ít nìjaké rychlej¹í
+algoritmy èi datové struktury, to by ale bylo velmi slo¾ité a o to v~tomto
+programu nejde.
+
+\bigskip
+
+Dal¹í vìc, kterou Sekáèek o¹etøuje, ale je¹tì jsem ji nepopsal, jsou
+neslabièná slova. Ty patøí k~nìjaké slabice, ale jsou oddìlená mezerami.
+Jedná se konkrétnì o pøedlo¾ky k, s, v a z. Ty Sekáèek pøipojí k~následujímu
+slovu je¹tì ve funkci \fce sekejtext pøed èímkoliv jiným. 
+
+\n3{Komunikace s~u¾ivatelem}
+
+Jak Sekáèek komunikuje s~u¾ivatelem je popsáno v~u¾ivatelské dokumentaci.
+
+\n2{Èasová a pamì»ová slo¾itost}
+
+Poèet slov textu, který má být nasekán, oznaèím $N$, poèet slov
+v~souborech výjimek je~$V$. Pøedpokládám, ¾e ka¾dé slovo má nìjaký malý
+poèet písmen, øádovì zhruba 20, jak to v~èeských textech bývá, a tento poèet
+tedy mohu pova¾ovat za konstantu.
+
+Èasová slo¾itost Sekáèku je pak $\O(N)$ na rozdìlení na slova, $\O(NV)$ na
+hledání výjimek, $\O(V^2)$ na sekání výjimek a $O(N)$ na sekání obyèejných
+slov. Celková èasová slo¾itost je tedy $\O(NV + V^2)$, ¹la by ale zlep¹it a¾
+na $\O(NV)$ a s~pou¾itím nìjakých rychlých stringových algoritmù snad a¾ na
+$\O(N+V)$.
+
+\n2{Mo¾ná vylep¹ení do dal¹ích verzí}
+
+\od exe pro Windows
+-- Sekáèek spolehlivì funguje jen na Linuxu, skripty v~Pythonu 3 ale mohou
+bì¾et i na ostatních operaèních systémech. Existují programy jako py2exe, které
+z~pythonovského skriptu udìlají exe soubor pro Windows, tak¾e na spu¹tìní
+není potøeba interpretr. Takový program, který by pracoval s~Pythonem
+3 jsem ale dosud nena¹el.
+
+\od GUI
+
+\od nastavení pøístupu k~dìlení -- u~nìkterých slov je mo¾no dìlit by/strý
+i bys/trý, Sekáèek by mohl zvládat oba pøístupy a dát u¾ivateli na výbìr
+
+\od poèítání slabik -- nástroj sc, syllable count, který vypí¹e poèet slabik
+v~textu
+
+\od náhodné básnièky -- S~pomocí Sekáèku se dá vytvoøit seznam v¹ech èeských
+slabik, z~tìchto slabik by se pak daly skládat básnièky, které budou mít
+naprosto pøesný rytmus a rým podle zadaného vzoru, ale budou bez významu
+z~náhodných slabik.
+
+%%%%%%%%%%%%%%%%%%%%
+% todle zbylo z u¾ivatelské dokumentace
+
+\n2{O autorovi}
+
+Sekáèek vznikl jako zápoètový program pøedmìtu Programování I na
+Matematicko-fy\-zi\-kál\-ní fakultì UK v~Praze v~zimním semestru 2013/14. 
+
+Autorem je Dominik Macháèek. Kontakt na autora: gldkslfmsd@gmail.com.
+
+Sekáèek je pøístupný pod licencí Creative Commons.
+
+\bye
