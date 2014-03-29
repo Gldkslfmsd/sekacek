@@ -1,0 +1,7 @@
+Institute In/sti/tute
+Finite Fi/nite
+semifield([s$]) se/mi/field\1
+projective pro/je/ctive
+plane([s$]) plane\1
+Carter([o$]) Car/ter\1
+California Ca/li/for/ni/\1 % zde nastane chyba, skupina 1 není nastavená

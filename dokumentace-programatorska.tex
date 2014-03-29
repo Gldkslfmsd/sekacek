@@ -25,7 +25,7 @@
 %-- exe pro Windows
 %-- GUI
 %-- Perl? asi ne
-% -- nastavení pøístupu k dìlení -- by/strý nebo bys/trý
+%  -- nastavení pøístupu k dìlení -- by/strý nebo bys/trý
 %-- poèítání slabik
 %-- náhodné básnièky a písnièky
 %informace o autorovi, o dokumentaci
@@ -57,16 +57,23 @@ Ta databáze bude zøejmì v¾dy neúplná, je na u¾ivateli, aby si ji doplnil.
 
 K Sekáèku patøí tyto soubory:
 
-\od sekacek.py -- zdrojový kód
+\od \link sekacek.py -- zdrojový kód
 
-\od .sekacek -- pùvodní soubor výjimek, který Sekáèek otvírá otvírá pøi
+\od \link .sekacek -- pùvodní soubor výjimek, který Sekáèek otvírá otvírá pøi
 ka¾dém spu¹tìní
 
-\od dokumentace.pdf -- u¾ivatelská dokumentace
+\od \link dokumentace.pdf -- u¾ivatelská dokumentace. Je v~ní popsáno ovládání
+Sekáèku a jeho mo¾né vyu¾ití, doporuèuji k~proètení døíve, ne¾ zaènete èíst
+tuto dokumentaci.
 
-\od dokumentace-programatorska.pdf -- tato programátorská dokumentace
+\od \link dokumentace-programatorska.pdf -- tato programátorská dokumentace
 
-\od vzorové vstupy
+\od vzorový vstup: \link Knuth.txt
+
+\od vzorové soubory výjimek \link
+vyjimky\_Knuth.txt{\rm,}
+
+\link vyjimky\_chyba1\_Knuth.txt{\rm,} \link vyjimky\_chyba2\_Knuth.txt{\rm .} 
 
 
 \n3{V èem je napsán?}
@@ -77,7 +84,7 @@ Tento skriptovací jazyk jsem vybral
 z~nìkolika dùvodù. Jednak proto, ¾e
 ho ovládám na dostateèné úrovni, proto, ¾e má mnoho funkcí
 a knihoven jako napøíklad regulární výrazy, které mohu pou¾ít a nemusím je
-psát sám, dále je velmi struèný, jednoduchý a intuitivní, o~spoustu vìcí se
+psát sám, dále je velmi struèný, je multiplatformní, jednoduchý a intuitivní, o~spoustu vìcí se
 programátor nemusí starat.
 V~Pythonu lze napsat napøíklad výraz \uv{{\tt 0 <= x <=
 10}}, to v~jiných jazycích takto snadno nelze.
@@ -103,29 +110,29 @@ s~diakritikou, pøesto¾e Python 3 to umo¾òuje. Sekáèek je ale program na
 sekání èeského textu, proto jsem zvolil názvy v~èeském jazyce.
 Nepøedpokládám, ¾e by si jeho zdrojový kód prohlí¾el a chtìl pochopit nìkdo,
 kdo neumí èesky a neumí si správnì zobrazit soubor v~UTF-8. Podobná klíèová slova
-jako \fce sténá a \fce stìna, která by se li¹ila pouze v~diakritice a ten rozdíl by
+jako \fce sténá a \fce stìna, která by se li¹ila pouze v~diakritice a ten rozdíl
 by tedy byl snadno pøehlédnutelný, nepou¾ívám, tak¾e doufám, ¾e tato volba nikomu neublí¾í.
 
-\n2{Jak pracuje Sekáèek?}
+\n2{Pou¾itý algoritmus Sekáèku}
 
 Sekáèek vyu¾ívá postup pro strojové dìlení slov na slabiky, který
 vychází z~èlánku Dìlení slov v~èe¹tinì pomocí strojù
-z~èasopisu Na¹e øeè\pozn{Dostupný na internetu
+z~èasopisu Na¹e øeè\pozn{Dostupný na Internetu
 zde: \link http://nase-rec.ujc.cas.cz/archiv.php?art=5348
 }.
 
 
-\n3{Strojové dìlení slov na slabiky}
+\n3{Pravidla pro strojové dìlení slov na slabiky}
 
 
 Slova v~textu se skládají z~grafémù (jinak øeèeno písmen), dají se rozdìlit
 podle významu v~konkrétním slovì na vokály a konzonanty.
 
-Vokály jsou samohlásky, a, e, i, o, u, y, a jejich dlouhé verze. Budu je
+Vokály jsou samohlásky, a, e, i, y, o, u, á, é, ì, í, ý, ó, ù, ú. Budu je
 znaèit znakem V.
 
-Konzonanty, K, jsou souhlásky, b, f, l, m, p, s, v, z, h, ch, k, r, d, t, n
-atd.
+Konzonanty, K, jsou souhlásky, b, c, è, d, ï, f, g, h, ch, j, k, l, m, ò, p,
+q, r, ø, s, ¹, t, », v, w, x, z, ¾.
 
 V~èlánku jsou je¹tì dal¹í skupiny grafémù, slabièné konzonanty, co¾ jsou
 slabikotvorná l a r, souhláskové grafémy, co¾ jsou souhlásky kromì
@@ -135,9 +142,9 @@ umím pøevést na tyto dvì, tak¾e je prozatím nebudu uva¾ovat.
 %Ka¾dá je tvoøena jádrem, to je obvykle vokál, mù¾e mí souhlásky pøed jádrem
 %a po jádru.
 
-\bigskip 
+%\bigskip 
 
-{\bf Pravidla:}
+%{\bf Pravidla:}
 
 \def\pr#1{\item{#1}}%
 
@@ -164,7 +171,7 @@ poslední souhláska skupiny.
 \n3{III. nedìlitelné skupiny}
 
 Nìkteré skupiny souhlásek jsou nedìlitelné, v¾dy jsou souèástí jedné slabiky. Ty se
-pro Sekáèek vyjádøí, jako by byly jen jedna slabika, pak se aplikují ostatní
+pro Sekáèek vyjádøí, jako by byly jen jedno písmeno, pak se aplikují ostatní
 pravidla.
 \bigskip
 
@@ -172,7 +179,7 @@ Tyto skupiny jsou
 
 \pr{a)}
 Souhláskové digramy: sp, st, th, Kr, Kl, Kø (za K je zde jakýkoliv konzonant
-kromì l, r, ø), Kv.
+kromì l, r, ø), Kv. 
 
 \pr{b)}
 Souhláskové trigramy: str, stø, skv
@@ -181,20 +188,21 @@ Souhláskové trigramy: str, stø, skv
 Nedìlitelné digramy pozièní, ty jsou nedìlitelné pouze v~pøípadì, ¾e se pøed
 nimi nachází souhláska: sk a ¹t, napøíklad náchod(sk)ý, arab(¹t)ina.
 
+Sám jsem pøidal jsem je¹tì skupiny zd a zdn, v~èlánku zmínìny nejsou.
+
 \n3{IV. skupiny samohlásek}
-\pr{a)} Skupiny au, ou, ai, oi a eu na záèátku slova pova¾uji za
-nedìlitelné.
+\pr{a)} Skupiny au, ou, ai, oi, pova¾uji za
+nedìlitelné, k~tomu je¹tì eu, pokud se vykytuje na zaèátku slova.
 
 \pr{b)} Ostatní výskyty dvou samohlásek vedle sebe se v¾dy oddìlují.
 
-
+\break
 \n3{Výjimky}
-
 Existují slova, která se podle tìchto pravidel nebudou dìlit správnì,
 napøíklad pododdìlení se podle pravidla I má dìlit po/dod/dì/le/ní. Tato
 slova tvoøí výjimky a je tøeba je o¹etøit zvlá¹».
 
-\n2{Sem se dá nìjaký vtipný nadpis}
+\n2{Jak funguje Sekáèek?}
 
 %Text má Sekáèek ulo¾ený v~øetìzcích, v~typu string. V~Sekáèku se hodnì
 %pracuje s~regulárními výrazy, které pou¾ívají funkce z~modulu re. 
@@ -272,7 +280,7 @@ programu nejde.
 \bigskip
 
 Dal¹í vìc, kterou Sekáèek o¹etøuje, ale je¹tì jsem ji nepopsal, jsou
-neslabièná slova. Ty patøí k~nìjaké slabice, ale jsou oddìlená mezerami.
+neslabièná slova. Ta patøí k~nìjaké slabice, ale jsou oddìlená mezerami.
 Jedná se konkrétnì o pøedlo¾ky k, s, v a z. Ty Sekáèek pøipojí k~následujímu
 slovu je¹tì ve funkci \fce sekejtext pøed èímkoliv jiným. 
 
@@ -280,6 +288,7 @@ slovu je¹tì ve funkci \fce sekejtext pøed èímkoliv jiným.
 
 Jak Sekáèek komunikuje s~u¾ivatelem je popsáno v~u¾ivatelské dokumentaci.
 
+\break
 \n2{Èasová a pamì»ová slo¾itost}
 
 Poèet slov textu, který má být nasekán, oznaèím $N$, poèet slov

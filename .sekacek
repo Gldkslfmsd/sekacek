@@ -1,19 +1,22 @@
 podod pod/od
-   " komentáře začínají ", #, // nebo % pokračují do konce řádku
 polo po/lo
-^troj(če|hran) troj/\g<1>nic
 ^dvojakord dvojakord
-# p # tady nic nehledej
-něco            ně/co % už nic
 ^Anna$ A/nna
-odopero 	od/o/pe/ro % tohle je třeba spravit!!!
-#" co tohle?
-^sedm se/dm
-^sedm(náct|de) se/dm/\1
-osm o/sm\1 # co to říká na osmnáct?
+odopero	od/o/pe/ro
+^sedm$ se/dm
+^sedm(náct$|de) se/dm/\1
+^sedmnáct([ýáéí]) se/dm/nác/t\1
+osm o/sm
 bezolovna bez/o/lo/vna
-leu           leu
-#podobojí pod/o/bo/jí
-#podvod pod/vod
+leu leu
+podobojí pod/o/bo/jí
+podvod pod/vod
+buchamr buc/ha/mr # zvláštní zednické kladívko
+doudit do/u/dit
+^douze do/u/ze
 
-# nechám omezení na jednoslovné výjimky, pro jednoduchost
+^Wolf$ Wolf
+Wolfgang$ Wolf/gang
+Wolfgang([uao]) Wolf/gan/g\1
+Goeth(.) Goe/th\1
+Beethoven$ Bee/tho/ven

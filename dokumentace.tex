@@ -82,7 +82,11 @@ Sekáèek komunikuje s~u¾ivatelem pouze pøes pøíkazový øádek.
 \n3{Spu¹tìní, vstup a výstup}
 
 Spou¹tí se pøíkazem {\tt sekacek.py}. Je-li zadán bez parametrù, èeká na
-text k~nasekání na standartním vstupu. Výstup vypí¹e opìt na standartní
+text k~nasekání na standartním vstupu. V~tom pøípadì napi¹te Vá¹ text do
+terminálu, konce øádkù oddìlujte Enterem, na konci stisknìte Enter a Ctrl+D.
+Pou¾ijte kódování UTF-8.
+
+Výstup vypí¹e Sekáèek opìt na standartní
 výstup.
 
 Za názvem programu lze zadat pøepínaèe a nakonec název souboru nebo souborù,
@@ -152,14 +156,32 @@ dìlit. Mezi hranice slabik uprostøed slov ve druhém výrazu vlo¾te \uv{{\tt
 Do souborù je mo¾no vkládat komentáøe. Ty zaèínají znakem {\tt \%}, {\tt
 \#}, {\tt "} nebo dvìma lomítky {\tt //} a pokraèují a¾ do konce øádku.
 
-Prázdné øádky se ignorují.
+Prázdné øádky se pøeskakují. 
+
+
+Sekáèek zpracovává soubory výjimek postupnì od
+zaèátku, na ji¾ zmìnìná slova aplikuje dal¹í zmìny ze souboru výjimek.
+Pokud napí¹ete do souboru výjimek napøíklad {\tt abc def\zpetnelomitko ndef
+ghi\zpetnelomitko n} a na vstup dáte {\tt abc}, dostanete {\tt ghi}.
+První {\tt abc} zmìní vstup na {\tt def} a dal¹í øádek ho zmìní na
+{\tt ghi}. 
+
+\bigskip
 
 Pøíklad:
-{\tt
-odopero od/o/pe/ro
-}
-Rozdìlí {\tt sedm(de|náct) se/dm/{\tt\char`\\}1} rozdìlí jk
-TODO: dodìlat
+
+\prep
+{\tt odopero od/o/pe/ro}
+
+Rozdìlí odoperovat na od/o/pe/ro/vat, ale
+odoperuj tato výjimka neo¹etøí, to rozdìlí standartnì o/do/pe/ruj
+
+\prep
+{\tt sedm(de|náct) se/dm/{\tt\char`\\}1}
+
+Slovo sedmdesát rozdìlí na 
+se/dm/de/sát, se\-dm\-náct na~se/dm/náct, ale pozor: hledá se i uprostøed
+slov a za konec výjimky se vlo¾í konec slabiky, tak¾e ze sedmnáctý bude se/dm/náct/ý.
 
 \n2{O autorovi}
 

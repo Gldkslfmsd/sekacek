@@ -1,7 +1,16 @@
 #!/usr/bin/python3
+#coding=utf-8
+
+# Sekáček -- dělení českého textu na slabiky
+# Autor: Dominik Macháček, gldkslfmsd@gmail.com
+# Creative Commons 2013/14
+
 import sys
 import re
 import os.path
+
+##########################
+## FUNKCE NA SEKÁNÍ TEXTU:
 
 def rozliš(slovo):
 	slovo=slovo.lower()
@@ -9,6 +18,7 @@ def rozliš(slovo):
 	vyměň=[
 		('ch','c0'),
 		(r'rr','r0'), (r'll','l0'),
+		(r'nn','n0'), 
 		(r'th','t0'),
 		(r'[ao]u',r'0u'), # diftongy au, ou 
 		(r'^eu',r'0u'), # eu nedělitelný jen na začátku slova, Ze/us ne
@@ -27,8 +37,8 @@ def rozliš(slovo):
 
 		(r'['+konzonanty+']','K')
 	]
-	for (a,b) in vyměň: # to tu nemá bej, ne?
-		slovo=re.sub(a,b,slovo)	# TODO: jak to je?
+	for (a,b) in vyměň: 
+		slovo=re.sub(a,b,slovo)
 	return slovo
 
 def sekejmasku(maska):
@@ -135,25 +145,24 @@ def sek(slovo): # na debugování, vypíše všecky mezivýsledky sekání slova
 	print('rozsekané slovo:\t',sekejslovo(slovo,'/'))
 	print()
 
-#print(sys.argv)
+#############################################
+## NAČTENÍ VSTUPU A KOMUNIKACE S UŽIVATELEM:
 
 nápověda='''
 Sekáček -- sekání českého textu na slabiky
-Použití: sekacek [PŘEPÍNAČ]… [SOUBOR]…
- nebo: sekacek [PŘEPÍNAČ]…
+Použití: sekacek.py [PŘEPÍNAČ]… [SOUBOR]…
+nebo: sekacek.py [PŘEPÍNAČ]…
 V každém souboru na vstupu očekává český text, všechna slova v něm rozdělí na slabiky. Bude-li zadán více než jeden soubor, otevře všechny, naseká a vypíše za sebe.
 Jestliže SOUBOR nebude zadán nebo bude „-“, bude čten standardní vstup. Slovo je neprázdná posloupnost znaků oddělená jakýmikoliv znaky kromě písmen.
 Lze zvolit následující přepínače:
-	-ox, -o x, --oddělovač=x	slabiky se budou oddělovat řetězcem x, standartně /
-	-sy, -s y, --spojovník=y	neslabičná slova se ke slabice budou připojovat řetězcem y, standartně ~
+	-ox, -o x, --oddělovač=x		slabiky se budou oddělovat řetězcem x, standartně /
+	-sy, -s y, --spojovník=y		neslabičná slova se ke slabice budou připojovat řetězcem y, standartně ~
 	-v SOUBOR [SOUBOR]…, --výjimky=SOUBOR	otevře SOUBOR a z něj načte slova, která má dělit jinak než standartně
-	-t, --tiše	nevypisuje žádné chybové hlášky
-	-i	ignoruje všechna varování
-	--help	vypíše tuto nápovědu a skončí
+	-t, --tiše				nevypisuje žádné chybové hlášky
+	-i					ignoruje všechna varování
+	--help					vypíše tuto nápovědu a skončí
 '''
-# ukázka -- program předvede, co umí
-# přepínače nelze lepit na sebe!!!
-	# to je moc složitý
+
 ignorovatvarování=False
 hlásitochybách=True
 def chyba_konec():
@@ -180,8 +189,7 @@ if '-i' in sys.argv:
 	ignorovatvarování=True
 if '--help' in sys.argv:
 	print(nápověda)
-	sys.exit()	
-
+	sys.exit(1)	
 
 souboryvýjimek=['.sekacek']
 oddělovač='/'
@@ -249,20 +257,14 @@ while i<len(sys.argv):
 		break
 	i+=1
 
-#print('délka argv',len(sys.argv))
-#print('jsem za cyklem',souboryvýjimek)
-##print('mám hlásit o chybách?',hlásitochybách)
-#print('o',oddělovač,'s',spojovník)
-#print('navstupu bude',souborynavstupu)
-#print()
-komentáře=['#','%','//','"']
 výjimky=[]
 for s in souboryvýjimek:
 	řádek=1
-	try:
-		f=open(s,'r')
+	try: f=open(s,'r')
+	except: chybasouborneexistuje(s)
+	else:
 		for v in f:
-			for k in komentáře:
+			for k in ['#','%','//','"']: # odstranění komentářů
 				v=re.sub(k+r'.*$','',v)
 			if re.search(r'\S',v): # je to neprázdný řádek
 				if re.search(r'^\s*\S+\s+\S+\s*$',v): # jsou tam dvě slova
@@ -270,16 +272,10 @@ for s in souboryvýjimek:
 					try:
 						[a,b]=v
 						výjimky.append((a,b))
-					except:
-						chybašpatnýformát(s,řádek)
-						# tato výjimka je zbytečná, ale co když ne?
-				else:
-					chybašpatnýformát(s,řádek)	
+					except:	chybašpatnýformát(s,řádek)
+				else: chybašpatnýformát(s,řádek)	
 			řádek+=1
 		f.close()
-	except:
-		chybasouborneexistuje(s)
-#print('všechny výjimky: ',výjimky)
 
 for (a,b) in výjimky:
 	b=re.sub(r'/',oddělovač,b)
@@ -291,104 +287,11 @@ if souborynavstupu:
 		vstup=vstup+f.read()
 		f.close()
 else:
-	while True:
+	while True: # čte se standartní vstup
+		i=''
 		try: i=input()
 		except (KeyboardInterrupt,EOFError): 
-			vstup+=i
+			vstup+=str(i)
 			break
 		else: vstup+=i+'\n'
 sekejtext(vstup)
-text='''
-Na počátku stvořil Bůh nebe a zemi.
-Země byla pustá a prázdná a nad propastnou tůní byla tma. Ale nad vodami vznášel se duch Boží.
-I řekl Bůh: „Buď světlo!“ A bylo světlo.
-Viděl, že světlo je dobré, a oddělil světlo od tmy.
-Světlo nazval Bůh dnem a tmu nazval nocí. Byl večer a bylo jitro, den první.
-I řekl Bůh: „Buď klenba uprostřed vod a odděluj vody od vod!“
-Učinil klenbu a oddělil vody pod klenbou od vod nad klenbou. A stalo se tak.
-Klenbu nazval Bůh nebem. Byl večer a bylo jitro, den druhý.
-I řekl Bůh: „Nahromaďte se vody pod nebem na jedno místo a ukaž se souš!“ A stalo se tak.
-Souš nazval Bůh zemí a nahromaděné vody nazval moři. Viděl, že to je dobré.
-Bůh také řekl: „Zazelenej se země zelení: bylinami, které se rozmnožují semeny, a ovocným stromovím rozmanitého druhu, které na zemi ponese plody se semeny!“ A stalo se tak.
-'''
-#sek('stacionární')
-#sek('využívá')
-#sek('vichr')
-#sek('bystřina')
-#sek('bystrý')
-#sek('břicho')
-#sek('bysta')
-#sek('přeskvělý')
-#sek('koniklec')
-#sek('pekl')
-#sek('postl')
-#sek('arabština')
-#sek('skoro')
-#sek('Anna')
-#sek('apostrof')
-#sek('Antonín')
-#sek('klenbou')
-#sek('postavit')
-#sek('automobil')
-#sek('poloautomaticky')
-#sek('automat')
-#sek('pěkně')
-#sek('jak')
-#sek('poddaný')
-#sek('pododdělení')
-#sek('trojúhelník')
-#sek('Boccacio')
-#sek('doktor')
-#sek('propastnou')
-#sek('první')
-#sek('dveře')
-#sek('podvod')
-#sek('denní')
-#sek('prázdná')
-#sek('prázdniny')
-#sek('bezolovnatý')
-#sek('bezouška')
-#sek('bezdomovec')
-#sek('bezinka')
-#sek('bezohlednost')
-#sek('dvojakord')
-#sek('laickém')
-#sek('paleontologa')
-#sek('arch')
-#sek('autem')
-#sek('deismus')
-#sek('Zeus')
-#sek('eutanázie')
-#sek('leukémie')
-#sek('neonacista')
-##asi bude lepší ou měnit za 0V, ne V0
-
-popis='''
-Tento program se jmenuje sekáček.
-Dostane na vstupu český text a naseká ho na slabiky. (Trochu přesněji řečeno, mezi každé dvě uprostřed slova vloží /.)
-
-'''
-text2='''
-Stacionární duál odoperoval desetinásobnému geodetovi čtyřiadvacet hemiedrů doobléknuv ho asociací využívající dřevoobráběcí bibliograf.
-
-Je libo hemiedr? Dodekaedr? Tetraedr? Paleontologa? Nebo fialku? 
-
-Mein Luftkissenfahrzeug ist voller Aale.
-Chrysanthemum leucanthemum
-familia: Compositae (Asteraceae)
-coemeterium
-
-Tento program si s angličtinou správně neporadí, seká ji, jako by to byla čeština:
-	A left-leaning red–black (LLRB) tree is a type of self-balancing binary search tree. It is a variant of the red–black tree and guarantees the same asymptotic complexity for operations, but is designed to be easier to implement.
-
-To je, co?
-
-Jak umí sekat latinu? Moc dobře ne:
-
-In principio creavit Deus caelum et terram 2 terra autem erat inanis et vacua et tenebrae super faciem abyssi et spiritus Dei ferebatur super aquas 3 dixitque Deus fiat lux et facta est lux 4 et vidit Deus lucem quod esset bona et divisit lucem ac tenebras 5 appellavitque lucem diem et tenebras noctem factumque est vespere et mane dies unus
-
-6 dixit quoque Deus fiat firmamentum in medio aquarum et dividat aquas ab aquis 7 et fecit Deus firmamentum divisitque aquas quae erant sub firmamento ab his quae erant super firmamentum et factum est ita 8 vocavitque Deus firmamentum caelum et factum est vespere et mane dies secundus
-'''
-#sekejtext(popis)
-#sekejtext(text)
-#sekejtext(text2)
